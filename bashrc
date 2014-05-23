@@ -4,7 +4,7 @@ alias gvim="UBUNTU_MENUPROXY= gvim"
 #configs
 export EDITOR="vim"
 
-export PATH=$PATH:/home/schillb/bin
+export PATH=$PATH:/home/alord/bin
 
 #colored manpages
 export LESS_TERMCAP_mb=$'\E[01;31m'
