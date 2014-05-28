@@ -6,8 +6,6 @@ let mapleader=","             " change the leader to be a comma vs slash
 """ Key mappings
 let g:pep8_map='<leader>8'
 
-""" Visual appearance settings. 
-colorscheme slate
 
 " All built in settings 
 set list
@@ -54,6 +52,12 @@ set incsearch               " Incrementally search while typing a /regex
 set wildignore+=*.o,*.obj,.git,*.pyc
 set wildignore+=eggs/**
 set wildignore+=*.egg-info/**
+
+""" Visual appearance settings. 
+colorscheme slate
+hi cursorline cterm=NONE ctermbg=darkred ctermfg=white guibg=darkred guifg=white
+hi Search cterm=NONE ctermbg=DarkMagenta ctermfg=white  guibg=DarkMagenta guifg=white
+hi Visual cterm=NONE ctermbg=darkblue ctermfg=white  guibg=darkblue guifg=white
 
 " found at: 
 " https://stackoverflow.com/questions/235439/vim-80-column-layout-concerns
