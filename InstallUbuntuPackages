@@ -5,4 +5,6 @@ apt-get update
 apt-get upgrade
 apt-get dist-upgrade
 
-apt-get install 
+apt-get install gnome-shell
+apt-get install vim-kde
+apt-get install python-setuptools
