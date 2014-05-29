@@ -4,6 +4,9 @@ alias gvim="UBUNTU_MENUPROXY= gvim"
 #configs
 export EDITOR="vim"
 
+#set up virtualenvwrapper
+source /usr/local/bin/virtualenvwrapper.sh
+
 export PATH=$PATH:/home/alord/bin
 
 #colored manpages
