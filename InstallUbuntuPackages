@@ -1,0 +1,8 @@
+# This file contains a number of apt-get installs of programs and services I find useful
+# on any machine that I own or operate.
+
+apt-get update
+apt-get upgrade
+apt-get dist-upgrade
+
+apt-get install 
