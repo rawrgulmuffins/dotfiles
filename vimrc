@@ -8,12 +8,11 @@ let g:pep8_map='<leader>8'
 
 
 " All built in settings 
-set list
-set number
 syntax on                     " syntax highlighing
 filetype on                   " try to detect filetypes
 filetype plugin indent on     " enable loading indent file for filetype
 set number                    " Display line numbers
+set list                      " Display post-fix spaces using the $ character.
 set numberwidth=1             " using only 1 column (and 1 space) while possible
 set background=dark           " We are using dark background in vim
 set title                     " show title in console title bar
