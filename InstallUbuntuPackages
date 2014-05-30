@@ -8,3 +8,4 @@ apt-get dist-upgrade
 apt-get install gnome-shell
 apt-get install vim-kde
 apt-get install python-setuptools
+apt-get install nfs-common
