@@ -45,21 +45,15 @@ White='\e[0;37m'    # White
 NC='\e[0m'          # Text Reset / No Color
 
 function exitstatus {
-
-        EXITSTATUS="$?"
-
+    EXITSTATUS="$?"
         if [ "$EXITSTATUS" -eq "0" ]
         then
-                #PS1="\[$(tput bold)\]\[$(tput setaf 1)\]\h\[$(tput setaf 6)\]/\W\[$(tput setaf 2)\] :) $\[$(tput sgr0)\] "
-                PS1="\[\033[36m\]\u\[\033[m\]@\[\033[33;1m\]\h:\[$Green\]\W :) $\[\033[m\] "
-                #PS1="\[\033[36m\]\u\[\033[m\]@\[\033[32m\]\h:\[\033[33;1m\]\W :) $\[\033[m\] "
-        else
-                #PS1="\[$(tput bold)\]\[$(tput setaf 1)\]\h\[$(tput setaf 6)\]/\W\[$(tput setaf 1)\] :( $\[$(tput sgr0)\] "
-                PS1="\[\033[36m\]\u\[\033[m\]@\[\033[33;1m\]\h:\[$Red\]\W :( $\[\033[m\] "
-                #PS1="\[\033[36m\]\u\[\033[m\]@\[\033[32m\]\h:\[ $Red \]\W :( $\[ $NC \] "
+            PS1='\[\e[1;32m\][\u@\h \w]\$:)'
+            else
+            PS1='\[\e[1;31m\][\u@\h \w]\$:('
         fi
-
 }
+
 #prompt commented out in favor of exitstatus prompt
 #export PS1="\[\033[36m\]\u\[\033[m\]@\[\033[32m\]\h:\[\033[33;1m\]\w\[\033[m\]\$ "
 
