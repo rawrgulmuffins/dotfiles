@@ -5,7 +5,7 @@ let mapleader=","             " change the leader to be a comma vs slash
 
 """ Key mappings
 let g:pep8_map='<leader>8'
-
+vnoremap <C-c> "*y
 
 " All built in settings 
 syntax on                     " syntax highlighing
@@ -55,7 +55,6 @@ set wildignore+=*.egg-info/**
 
 """ Visual appearance settings. 
 colorscheme slate
-hi cursorline cterm=NONE ctermbg=darkred ctermfg=white guibg=darkred guifg=white
 hi Search cterm=NONE ctermbg=DarkMagenta ctermfg=white  guibg=DarkMagenta guifg=white
 hi Visual cterm=NONE ctermbg=darkblue ctermfg=white  guibg=darkblue guifg=white
 
