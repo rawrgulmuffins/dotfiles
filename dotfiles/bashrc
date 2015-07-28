@@ -79,3 +79,6 @@ function extract()      # Handy Extract Program
         echo "'$1' is not a valid file!"
     fi
 }
+
+eval "$(ssh-agent -s)"
+ssh-add ~/.ssh/id_rsa_github
