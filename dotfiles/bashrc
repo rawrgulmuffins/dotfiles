@@ -2,7 +2,7 @@
 alias gvim="UBUNTU_MENUPROXY= gvim"
 
 #configs
-export EDITOR="vim"
+export EDITOR="nvim"
 
 #set up virtualenvwrapper
 source /usr/local/bin/virtualenvwrapper.sh
@@ -39,6 +39,8 @@ Blue='\e[0;34m'     # Blue
 Purple='\e[0;35m'   # Purple
 Cyan='\e[0;36m'     # Cyan
 White='\e[0;37m'    # White
+
+# Set Terminal Colors
 
 NC='\e[0m'          # Text Reset / No Color
 
