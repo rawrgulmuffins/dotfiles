@@ -57,9 +57,9 @@ function exitstatus {
     EXITSTATUS="$?"
         if [ "$EXITSTATUS" -eq "0" ]
         then
-            PS1='\[\e[1;32m\][\u@\h \w]\:) \[\033[m\]'
+            PS1='\[\e[1;32m\][\u@\h \w] :) \[\033[m\]'
             else
-            PS1='\[\e[1;31m\][\u@\h \w]\:( \[\033[m\]'
+            PS1='\[\e[1;31m\][\u@\h \w] :( \[\033[m\]'
         fi
 }
 
