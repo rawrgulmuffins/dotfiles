@@ -93,3 +93,8 @@ function extract()      # Handy Extract Program
 
 eval "$(ssh-agent -s)" > /dev/null
 ssh-add ~/.ssh/id_rsa_github.com 2> /dev/null
+
+# Unit testing helper functions
+function nose1() {
+                nosetests $2 $3 $4 $5 --with-coverage --cover-erase --cover-branches --cover-package=parsers.$1 test/test_$1.py
+}
