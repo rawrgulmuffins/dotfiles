@@ -48,6 +48,9 @@ set smarttab                " Handle tabs more intelligently
 set hlsearch                " Highlight searches by default.
 set incsearch               " Incrementally search while typing a /regex
 
+""" Spelling and grammar
+set spell
+
 " Ignore these files when completing
 set wildignore+=*.o,*.obj,.git,*.pyc
 set wildignore+=eggs/**
