@@ -57,7 +57,7 @@ set wildignore+=eggs/**
 set wildignore+=*.egg-info/**
 
 """ Visual appearance settings. 
-colorscheme slate
+colorscheme pablo
 hi Search cterm=NONE ctermbg=DarkMagenta ctermfg=white  guibg=DarkMagenta guifg=white
 hi Visual cterm=NONE ctermbg=darkblue ctermfg=white  guibg=darkblue guifg=white
 autocmd BufNewFile,BufRead *.jinja set syntax=html
