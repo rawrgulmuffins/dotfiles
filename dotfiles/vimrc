@@ -7,8 +7,11 @@ let mapleader=","             " change the leader to be a comma vs slash
 let g:pep8_map='<leader>8'
 vnoremap <C-c> "*y
 
+" Code Syntax
+syntax on                     " syntax highlighting
+let g:markdown_fenced_languages = ['python']
+
 " All built in settings 
-syntax on                     " syntax highlighing
 filetype on                   " try to detect filetypes
 filetype plugin indent on     " enable loading indent file for filetype
 set number                    " Display line numbers
@@ -19,6 +22,7 @@ set title                     " show title in console title bar
 set wildmenu                  " Menu completion in command mode on <Tab>
 set wildmode=full             " <Tab> cycles between all matching choices.
 set cc=80                     " Set the column color to 80 characters.
+
 
 """ Moving Around/Editing
 set cursorline              " have a line indicate the cursor location
@@ -41,12 +45,21 @@ set matchpairs+=<:>         " show matching <> (html mainly) as well
 set foldmethod=indent       " allow us to fold on indents
 set foldlevel=99            " don't fold by default
 
+" These next three commands are to make hashs work with smart indent
+set cindent
+set cinkeys-=0#
+set indentkeys-=0#
+
 """ Searching and Patterns
 set ignorecase              " Default to using case insensitive searches,
 set smartcase               " unless uppercase letters are used in the regex.
 set smarttab                " Handle tabs more intelligently 
 set hlsearch                " Highlight searches by default.
 set incsearch               " Incrementally search while typing a /regex
+
+""" Tab Completion settings
+set wildmode=longest,list,full
+set wildmenu
 
 """ Spelling and grammar
 set spell
