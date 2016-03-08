@@ -1,5 +1,6 @@
-" This Vimrc is a modification  of Sontek. It's used and maintained by Alex Lord
-" and is intended to be used while programming python and c files.
+" This Vimrc is a modification of Sontek. It's used and maintained by
+" Alex LordThorsen and is intended to be used while programming python and
+" c files.
 
 let mapleader=","             " change the leader to be a comma vs slash
 
