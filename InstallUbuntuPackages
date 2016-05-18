@@ -13,5 +13,6 @@ apt-get install nfs-common
 apt-get install ngrep
 
 network_debugging_programs = ["ngrep", "tcpdump", "wireshark", "mitmproxy"]
+io_debuggin_programs = ["dstat"]
 editor_programs = ["vim"]
 
