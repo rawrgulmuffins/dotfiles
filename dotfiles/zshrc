@@ -1,0 +1,68 @@
+# In order for the prompt to work correctly you'll need to git clone
+# https://github.com/sindresorhus/pure then pull async.zsh and pure.zsh.
+# Both files (or symlinks) need to end up in $HOME/.zfunctions
+
+# Start out by pulling all of the basic unix shell configuration.
+emulate sh -c '. ~/.profile'
+
+# ------------------------ Shell History Configuration ------------------------
+setopt APPEND_HISTORY       # Don't overwrite, append!
+setopt INC_APPEND_HISTORY   # Write after each command
+setopt SHARE_HISTORY        # Killer: share history between multiple shells
+
+setopt HIST_IGNORE_DUPS     # Remove immediate duplicates
+setopt HIST_IGNORE_ALL_DUPS # No really, ignore duplicates
+setopt HIST_SAVE_NO_DUPS
+setopt HIST_EXPIRE_DUPS_FIRST
+setopt HIST_FIND_NO_DUPS
+
+setopt HIST_REDUCE_BLANKS   # Why is this not a default?
+setopt HIST_IGNORE_SPACE    # Don't save left justified spaces
+setopt HIST_NO_STORE        # No really, fuck spaces
+setopt EXTENDED_HISTORY     # Save start time and wall time of command
+
+
+# ------------------------------ Completion Stuff ------------------------------
+
+bindkey -M viins '\C-i' complete-word
+
+# Faster! (?)
+zstyle ':completion::complete:*' use-cache 1
+
+# case insensitive completion
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
+
+zstyle ':completion:*' verbose yes
+zstyle ':completion:*:descriptions' format '%B%d%b'
+zstyle ':completion:*:messages' format '%d'
+zstyle ':completion:*:warnings' format 'No matches for: %d'
+zstyle ':completion:*' group-name ''
+zstyle ':completion:*' completer _expand _complete _approximate _ignored
+
+
+# generate descriptions with magic.
+zstyle ':completion:*' auto-description 'specify: %d'
+
+# Don't prompt for a huge list, page it!
+zstyle ':completion:*:default' list-prompt '%S%M matches%s'
+
+# Don't prompt for a huge list, menu it!
+zstyle ':completion:*:default' menu 'select=0'
+
+# Have the newer files last so I see them first
+zstyle ':completion:*' file-sort modification reverse
+
+# color code completion!!!!  Wohoo!
+zstyle ':completion:*' list-colors "=(#b) #([0-9]#)*=36=31"
+
+unsetopt LIST_AMBIGUOUS
+
+# ---------------------------------- Prompt! ----------------------------------
+# Just a reminder, this section won't work without first installing pure zsh.
+
+fpath=( "$HOME/.zfunctions" $fpath )
+autoload -U promptinit && promptinit
+prompt pure
+
+# Highlighting only works if you clone zsh-syntax-highlighting
+source ${(q-)PWD}/zsh-syntax-highlighting.zsh
