@@ -5,6 +5,8 @@ from os.path import expanduser
 
 files_to_publish = [
     ("bashrc", ".bashrc"),
+    ("profile", ".profile"),
+    ("zshrc", ".zshrc"),
     ("ipythonrc", ".ipythonrc"),
     ("vimrc", ".vimrc"),
     ("vimrc", ".nvimrc"),]
