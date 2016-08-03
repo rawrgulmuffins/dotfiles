@@ -2,8 +2,16 @@
 # on any machine that I own or operate.
 
 # TODO turn this into a installation package using something like ansible or salt stack
-apt-get update
-apt-get dist-upgrade
+import shlex, subprocess
+import os
+
+# Check to make sure that our effective ID is root's ID.
+if os.geteuid() != 0:
+    exit("You need to have root privileges to run this script."
+         " Please try again, this time using 'sudo'.")
+
+# Debian / ubuntu install command
+install_command = "apt-get -yq install "
 
 install_list = [
     # Terminals
@@ -60,3 +68,15 @@ install_list = [
     "tig", # text-mode interface for git
     
 ]
+
+
+update_command = shlex.split("apt-get -yq update")
+dist_upgrade = shlex.split("apt-get -yq dist-upgrade")
+
+subprocess.run(update_command)
+subprocess.run(dist_upgrade)
+for package in install_list:
+    command = shlex.split("{install_command} {package}".format(
+        install_command=install_command,
+        package=package,))
+    subprocess.run(command)
