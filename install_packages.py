@@ -31,7 +31,8 @@ install_list = [
     "ranger", # Pretty console file system display
     "attr", # Manipulation of file attributes
     "pandoc", # Translation most text or markdown formats to any other format
-    "colortest" # Tests color capabilities of current terminal
+    "colortest", # Tests color capabilities of current terminal
+    "gparted", # Disk partition tool
     
     
     # Daemons
