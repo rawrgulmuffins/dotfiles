@@ -3,6 +3,45 @@ source ~/.profile
 # Shell History Configuration
 shopt -s histappend                      # append to history, don't overwrite it
 
+# Save and reload the history after each command finishes
+export PROMPT_COMMAND="history -a; history -c; history -r; $PROMPT_COMMAND"
+
+
+if [ -x /usr/bin/dircolors ]; then
+    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+    alias ls='ls --color=auto'
+    alias grep='grep --color=auto'
+fi
+
+# define colors
+Black='\e[0;30m'    # Black / Regular
+Red='\e[0;31m'      # Red
+Green='\e[0;32m'    # Green
+Yellow='\e[0;33m'   # Yellow
+Blue='\e[0;34m'     # Blue
+Purple='\e[0;35m'   # Purple
+Cyan='\e[0;36m'     # Cyan
+White='\e[0;37m'    # White
+
+# Set Terminal Colors
+
+NC='\e[0m'          # Text Reset / No Color
+
+function exitstatus {
+    EXITSTATUS="$?"
+        if [ "$EXITSTATUS" -eq "0" ]
+        then
+            PS1='\[\e[1;32m\][\u@\h \w] :) \[\033[m\]'
+            else
+            PS1='\[\e[1;31m\][\u@\h \w] :( \[\033[m\]'
+        fi
+}
+
+#prompt commented out in favor of exitstatus prompt
+#export PS1="\[\033[36m\]\u\[\033[m\]@\[\033[32m\]\h:\[\033[33;1m\]\w\[\033[m\]\$ "
+
+PROMPT_COMMAND=exitstatus
+
 
 # This function will pronounce words based on google's translation api.
 # define say function only if not already defined.

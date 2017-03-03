@@ -9,7 +9,8 @@ files_to_publish = [
     ("zshrc", ".zshrc"),
     ("ipythonrc", ".ipythonrc"),
     ("vimrc", ".vimrc"),
-    ("vimrc", ".nvimrc"),]
+    ("vimrc", ".nvimrc"),
+    ("gitconfig", ".gitconfig"),]
 
 current_files = os.listdir(".")
 current_dir = os.getcwd()
