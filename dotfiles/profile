@@ -8,7 +8,11 @@
 alias gvim="UBUNTU_MENUPROXY= gvim"
 
 #configs
-export EDITOR="nvim"
+export EDITOR="vim"
+export VISUAL="$EDITOR"
+export EDITOR="$VISUAL"
+
+# Work exports
 export DUCTTAPE_OWNER="alord"
 
 # This fixes a tmux and virtualenv interaction issue.
@@ -37,49 +41,6 @@ export HISTCONTROL=ignoredups:erasedups  # no duplicate entries
 export HISTSIZE=100000                   # big big history
 export HISTFILESIZE=100000               # big big history
 
-# This is a bash specific command. Move to bashrc and zshrc
-# shopt -s histappend                      # append to history, don't overwrite it
-
-# Save and reload the history after each command finishes
-export PROMPT_COMMAND="history -a; history -c; history -r; $PROMPT_COMMAND"
-
-
-if [ -x /usr/bin/dircolors ]; then
-    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
-    alias ls='ls --color=auto'
-    alias grep='grep --color=auto'
-fi
-
-# define colors
-Black='\e[0;30m'    # Black / Regular
-Red='\e[0;31m'      # Red
-Green='\e[0;32m'    # Green
-Yellow='\e[0;33m'   # Yellow
-Blue='\e[0;34m'     # Blue
-Purple='\e[0;35m'   # Purple
-Cyan='\e[0;36m'     # Cyan
-White='\e[0;37m'    # White
-
-# Set Terminal Colors
-
-NC='\e[0m'          # Text Reset / No Color
-
-function exitstatus {
-    EXITSTATUS="$?"
-        if [ "$EXITSTATUS" -eq "0" ]
-        then
-            PS1='\[\e[1;32m\][\u@\h \w] :) \[\033[m\]'
-            else
-            PS1='\[\e[1;31m\][\u@\h \w] :( \[\033[m\]'
-        fi
-}
-
-#prompt commented out in favor of exitstatus prompt
-#export PS1="\[\033[36m\]\u\[\033[m\]@\[\033[32m\]\h:\[\033[33;1m\]\w\[\033[m\]\$ "
-
-PROMPT_COMMAND=exitstatus
-
-
 function extract()      # Handy Extract Program
 {
     if [ -f $1 ] ; then
@@ -106,6 +67,7 @@ function extract()      # Handy Extract Program
 eval "$(ssh-agent -s)" > /dev/null
 ssh-add ~/.ssh/id_rsa_github &> /dev/null
 ssh-add ~/.ssh/id_rsa_github_west  &> /dev/null
+ssh-add ~/.ssh/id_rsa_github.com &> /dev/null
 
 # Git fooery
 
@@ -117,5 +79,5 @@ function fetch_remotes() {
     done
 }
 
- # Fetch updates for Duct Tape repos.
- alias dtup='fetch_remotes origin rludvigsen rsiemens rsteele sdouglas2 toguara upstream'
+# Fetch updates for Duct Tape repos.
+alias dtup='fetch_remotes origin rludvigsen rsiemens rsteele sdouglas2 toguara upstream'
