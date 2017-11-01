@@ -9,11 +9,17 @@ alias gvim="UBUNTU_MENUPROXY= gvim"
 
 #configs
 export EDITOR="nvim"
+export DUCTTAPE_OWNER="alord"
 
 # This fixes a tmux and virtualenv interaction issue.
 export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python
 #set up virtualenvwrapper
 source /usr/local/bin/virtualenvwrapper.sh
+
+# Set up pyvenv
+export PATH="~/.pyvenv/bin:$PATH"
+eval "$(pyvenv init -)"
+eval "$(pyvenv virtualenv-init -)"
 
 export PATH=$PATH:/home/alord/bin
 
@@ -98,4 +104,18 @@ function extract()      # Handy Extract Program
 
 # SSH key adding
 eval "$(ssh-agent -s)" > /dev/null
-ssh-add ~/.ssh/id_rsa_github.com 2> /dev/null
+ssh-add ~/.ssh/id_rsa_github 2> /dev/null
+ssh-add ~/.ssh/id_rsa_github_west  2> /dev/null
+
+# Git fooery
+
+# fetch from aribitrary git remotes in a loop
+function fetch_remotes() {
+    for user in $*
+    do
+        git fetch $user
+    done
+}
+
+ # Fetch updates for Duct Tape repos.
+ alias dtup='fetch_remotes origin rludvigsen rsiemens rsteele sdouglas2 toguara upstream'
