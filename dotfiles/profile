@@ -104,8 +104,8 @@ function extract()      # Handy Extract Program
 
 # SSH key adding
 eval "$(ssh-agent -s)" > /dev/null
-ssh-add ~/.ssh/id_rsa_github 2> /dev/null
-ssh-add ~/.ssh/id_rsa_github_west  2> /dev/null
+ssh-add ~/.ssh/id_rsa_github &> /dev/null
+ssh-add ~/.ssh/id_rsa_github_west  &> /dev/null
 
 # Git fooery
 
