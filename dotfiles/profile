@@ -3,6 +3,12 @@
 # Directory should be able to run every command in this profile. If a command
 # is shell specific then it should be moved to it's respective rc file.
 
+# This SO post contains information about how to load different profiles
+# depending in the shell that was loaded.
+# https://stackoverflow.com/questions/2683279/how-to-detect-if-a-script-is-being-sourced
+
+[[ "${BASH_SOURCE[0]}" != "${0}" ]] && . $HOME/.bashrc
+
 
 #Aliases
 alias gvim="UBUNTU_MENUPROXY= gvim"

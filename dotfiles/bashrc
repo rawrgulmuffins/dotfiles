@@ -1,5 +1,3 @@
-#source ~/.profile
-
 # Shell History Configuration
 shopt -s histappend                      # append to history, don't overwrite it
 
