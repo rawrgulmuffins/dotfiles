@@ -26,10 +26,7 @@ export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python
 #set up virtualenvwrapper
 source /usr/local/bin/virtualenvwrapper.sh
 
-# Set up pyvenv
-export PATH="~/.pyvenv/bin:$PATH"
-eval "$(pyvenv init -)"
-eval "$(pyvenv virtualenv-init -)"
+# TODO: Look into venv and it's setup process
 
 export PATH=$PATH:/home/alord/bin
 
