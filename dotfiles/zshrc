@@ -3,7 +3,7 @@
 # Both files (or symlinks) need to end up in $HOME/.zfunctions
 
 # Start out by pulling all of the basic unix shell configuration.
-emulate sh -c '. ~/.profile'
+#emulate sh -c '. ~/.profile'
 
 # ------------------------ Shell History Configuration ------------------------
 setopt APPEND_HISTORY       # Don't overwrite, append!
@@ -57,12 +57,9 @@ zstyle ':completion:*' list-colors "=(#b) #([0-9]#)*=36=31"
 
 unsetopt LIST_AMBIGUOUS
 
-# ---------------------------------- Prompt! ----------------------------------
-# Just a reminder, this section won't work without first installing pure zsh.
-
-fpath=( "$HOME/.zfunctions" $fpath )
-autoload -U promptinit && promptinit
-prompt pure
-
-# Highlighting only works if you clone zsh-syntax-highlighting
-source ${(q-)PWD}/zsh-syntax-highlighting.zsh
+# ---------------------------------- Prompt ----------------------------------
+# This was the source used to create this
+# https://wiki.archlinux.org/index.php/zsh#Prompts
+#
+autoload colors && colors
+PS1='%F{cyan}%n@%m %~%f %(?.%F{green}:).%F{red}[%?] :( )%#%f '
