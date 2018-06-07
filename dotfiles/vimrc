@@ -28,13 +28,15 @@ Plugin 'justinmk/vim-sneak'
 " Plugin 'tpope/vim-surround'
 " Plugin 'tpope/vim-repeat'
 " Plugin 'junegunn/fzf'
-" Plugin 'junegunn/fzf.vim'
+" Plugin 'junegunn/fzf.vim'            " Requires fzf to work.
 " Plugin 'suan/vim-instant-markdown'
 " Plugin 'Valloric/YouCompleteMe'
 " Plugin 'w0rp/ale'
 " Plugin 'fisadev/vim-isort'
 " Plugin 'junegunn/goyo.vim'
 " Plugin 'junegunn/limelight.vim'
+Plugin 'scrooloose/nerdtree'
+" Plugin 'Xuyuanp/nerdtree-git-plugin' " Requires nerdtree to work
 
 " Beautification
 " Plugin 'bling/vim-bufferline'

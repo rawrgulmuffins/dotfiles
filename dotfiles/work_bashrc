@@ -1,0 +1,90 @@
+# .bashrc
+
+# Source global definitions
+if [ -f /etc/bashrc ]; then
+    . /etc/bashrc
+fi
+
+# User specific aliases and functions
+# ANSIBLE MANAGED BLOCK
+export S3_DEFAULT_BUCKET=contextrelevant-testbucket
+export CR_ROOT=/opt/cr
+export ANACONDA_PYTHON=yes
+export PROFILE=c7c
+export BUILD_ALL_PKG_VERSION=20180326_d699a60
+export PATH=$PATH:/home/ec2-user/share/work/tools
+export PATH=$PATH:/home/ec2-user/share/work/repo/cluster/bin:/home/ec2-user/share/work/repo/cluster/tools
+export PATH=$PATH:${CR_ROOT}/bin:${CR_ROOT}/sbin
+export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${CR_ROOT}/lib
+if [ -f /opt/rh/devtoolset-2/enable ]; then
+  . /opt/rh/devtoolset-2/enable
+fi
+alias ipython="crpython /opt/cr/bin/ipython"
+alias py.test="crpython `which pytest`"
+yarn_kinit ()
+{
+  USER=$(id -nu);
+  KEYTAB=/etc/hadoop/conf/$USER.keytab;
+  PRINCIPAL=$(klist -k $KEYTAB | fgrep $USER | sed -e 's/^.* //' -e '$!d');
+  kinit -k -t $KEYTAB $PRINCIPAL
+}
+# ANSIBLE MANAGED BLOCK
+
+# ---------------------------- User  Defined RC --------------------------------
+
+# Shell History Configuration
+shopt -s histappend # append to history, don't overwrite it
+
+# Save and reload the history after each command finishes
+export PROMPT_COMMAND="history -a; history -c; history -r; $PROMPT_COMMAND"
+
+if [ -x /usr/bin/dircolors ]; then
+    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+    alias ls='ls --color=auto'
+    alias grep='grep --color=auto'
+fi
+
+# define colors
+Black='\e[0;30m'    # Black / Regular
+Red='\e[0;31m'      # Red
+Green='\e[0;32m'    # Green
+Yellow='\e[0;33m'   # Yellow
+Blue='\e[0;34m'     # Blue
+Purple='\e[0;35m'   # Purple
+Cyan='\e[0;36m'     # Cyan
+White='\e[0;37m'    # White
+
+# Set Terminal Colors
+
+NC='\e[0m'          # Text Reset / No Color
+
+function exitstatus {
+    EXITSTATUS="$?"
+        if [ "$EXITSTATUS" -eq "0" ]
+        then
+            PS1='\[\e[1;32m\][\u@\h \w] :) \[\033[m\]'
+            else
+            PS1='\[\e[1;31m\][\u@\h \w] :( \[\033[m\]'
+        fi
+}
+
+#prompt commented out in favor of exitstatus prompt
+#export PS1="\[\033[36m\]\u\[\033[m\]@\[\033[32m\]\h:\[\033[33;1m\]\w\[\033[m\]\$ "
+
+PROMPT_COMMAND=exitstatus
+
+# ------------------------ Versive App Settings -------------------------------
+
+# Externally shared hook.
+if [ -f /home/ec2-user/share/bash_hook.sh ] ; then
+  source /home/ec2-user/share/bash_hook.sh
+fi
+
+# This ensures that we're using the Versive patched Python instance.
+PYTHONPATH=/home/ec2-user/share/work/apps_repo/crepes/apt:${PYTHONPATH}
+
+# Not sure what these two do at this point in time.
+# Taken from:
+# https://contextrelevant.atlassian.net/wiki/spaces/EN/pages/154292523/Creating+a+Dev+Master+or+a+Multinode+Cluster
+export CR_FULL_ERROR=1
+cr cluster setprop cr-debug=4550e0834dc3426bb780c92649055e74
