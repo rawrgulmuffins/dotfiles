@@ -1,9 +1,43 @@
+# .bashrc
+
+# Source global definitions
+if [ -f /etc/bashrc ]; then
+    . /etc/bashrc
+fi
+
+# Uncomment the following line if you don't like systemctl's auto-paging feature:
+# export SYSTEMD_PAGER=
+
+# User specific aliases and functions
+# BEGIN ANSIBLE MANAGED BLOCK
+export S3_DEFAULT_BUCKET=${S3_DEFAULT_BUCKET:=versive-platform-test-mixed}
+export CR_ROOT=${CR_ROOT:=/opt/cr}
+export ANACONDA_PYTHON=${ANACONDA_PYTHON:=yes}
+export PROFILE=${PROFILE:=c7c}
+export BUILD_ALL_PKG_VERSION=${BUILD_ALL_PKG_VERSION:=20180619_a3fffc5}
+export PATH=$PATH:/home/ec2-user/share/work/tools
+export PATH=$PATH:/home/ec2-user/share/work/repo/cluster/bin:/home/ec2-user/share/work/repo/cluster/tools
+export PATH=$PATH:${CR_ROOT}/bin:${CR_ROOT}/sbin
+export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${CR_ROOT}/lib
+
+alias ipython="crpython ${CR_ROOT}/bin/ipython"
+alias py.test="crpython ${CR_ROOT}/bin/py.test"
+
+yarn_kinit ()
+{
+  USER=$(id -nu);
+  KEYTAB=/etc/hadoop/conf/$USER.keytab;
+  PRINCIPAL=$(klist -k $KEYTAB | fgrep $USER | sed -e 's/^.* //' -e '$!d');
+  kinit -k -t $KEYTAB $PRINCIPAL
+}
+# END ANSIBLE MANAGED BLOCK
+# ---------------------------- User  Defined RC --------------------------------
+
 # Shell History Configuration
-shopt -s histappend                      # append to history, don't overwrite it
+shopt -s histappend # append to history, don't overwrite it
 
 # Save and reload the history after each command finishes
 export PROMPT_COMMAND="history -a; history -c; history -r; $PROMPT_COMMAND"
-
 
 if [ -x /usr/bin/dircolors ]; then
     test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
@@ -35,14 +69,26 @@ function exitstatus {
         fi
 }
 
+fixssh() {
+    eval $(tmux show-env    \
+        |sed -n 's/^\(SSH_[^=]*\)=\(.*\)/export \1="\2"/p')
+}
 #prompt commented out in favor of exitstatus prompt
 #export PS1="\[\033[36m\]\u\[\033[m\]@\[\033[32m\]\h:\[\033[33;1m\]\w\[\033[m\]\$ "
 
 PROMPT_COMMAND=exitstatus
 
+# ------------------------ Versive App Settings -------------------------------
 
-# This function will pronounce words based on google's translation api.
-# define say function only if not already defined.
-if [ ! $(which say) ]; then
-    say() { if [[ "${1}" =~ -[a-z]{2} ]]; then local lang=${1#-}; local text="${*#$1}"; else local lang=${LANG%_*}; local text="$*";fi; mplayer "http://translate.google.com/translate_tts?ie=UTF-8&tl=${lang}&q=${text}" &> /dev/null ; }
+# Externally shared hook.
+if [ -f /home/ec2-user/share/bash_hook.sh ] ; then
+  source /home/ec2-user/share/bash_hook.sh
 fi
+
+export PYTHONPATH=/home/ec2-user/share/work/apps_repo/crepes/apt:${PYTHONPATH}
+
+# Not sure what these two do at this point in time.
+# Taken from:
+# https://contextrelevant.atlassian.net/wiki/spaces/EN/pages/154292523/Creating+a+Dev+Master+or+a+Multinode+Cluster
+export CR_FULL_ERROR=1
+cr cluster setprop cr-debug=4550e0834dc3426bb780c92649055e74

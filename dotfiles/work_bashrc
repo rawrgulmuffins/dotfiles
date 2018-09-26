@@ -5,22 +5,24 @@ if [ -f /etc/bashrc ]; then
     . /etc/bashrc
 fi
 
+# Uncomment the following line if you don't like systemctl's auto-paging feature:
+# export SYSTEMD_PAGER=
+
 # User specific aliases and functions
-# ANSIBLE MANAGED BLOCK
-export S3_DEFAULT_BUCKET=contextrelevant-testbucket
-export CR_ROOT=/opt/cr
-export ANACONDA_PYTHON=yes
-export PROFILE=c7c
-export BUILD_ALL_PKG_VERSION=20180326_d699a60
+# BEGIN ANSIBLE MANAGED BLOCK
+export S3_DEFAULT_BUCKET=${S3_DEFAULT_BUCKET:=versive-platform-test-mixed}
+export CR_ROOT=${CR_ROOT:=/opt/cr}
+export ANACONDA_PYTHON=${ANACONDA_PYTHON:=yes}
+export PROFILE=${PROFILE:=c7c}
+export BUILD_ALL_PKG_VERSION=${BUILD_ALL_PKG_VERSION:=20180619_a3fffc5}
 export PATH=$PATH:/home/ec2-user/share/work/tools
 export PATH=$PATH:/home/ec2-user/share/work/repo/cluster/bin:/home/ec2-user/share/work/repo/cluster/tools
 export PATH=$PATH:${CR_ROOT}/bin:${CR_ROOT}/sbin
 export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${CR_ROOT}/lib
-if [ -f /opt/rh/devtoolset-2/enable ]; then
-  . /opt/rh/devtoolset-2/enable
-fi
-alias ipython="crpython /opt/cr/bin/ipython"
-alias py.test="crpython `which pytest`"
+
+alias ipython="crpython ${CR_ROOT}/bin/ipython"
+alias py.test="crpython ${CR_ROOT}/bin/py.test"
+
 yarn_kinit ()
 {
   USER=$(id -nu);
@@ -28,8 +30,7 @@ yarn_kinit ()
   PRINCIPAL=$(klist -k $KEYTAB | fgrep $USER | sed -e 's/^.* //' -e '$!d');
   kinit -k -t $KEYTAB $PRINCIPAL
 }
-# ANSIBLE MANAGED BLOCK
-
+# END ANSIBLE MANAGED BLOCK
 # ---------------------------- User  Defined RC --------------------------------
 
 # Shell History Configuration
@@ -80,8 +81,7 @@ if [ -f /home/ec2-user/share/bash_hook.sh ] ; then
   source /home/ec2-user/share/bash_hook.sh
 fi
 
-# This ensures that we're using the Versive patched Python instance.
-PYTHONPATH=/home/ec2-user/share/work/apps_repo/crepes/apt:${PYTHONPATH}
+export PYTHONPATH=/home/ec2-user/share/work/apps_repo/crepes/apt:${PYTHONPATH}
 
 # Not sure what these two do at this point in time.
 # Taken from:
