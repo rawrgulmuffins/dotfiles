@@ -4,11 +4,20 @@
 
 # Start out by pulling all of the basic unix shell configuration.
 #emulate sh -c '. ~/.profile'
+#
+export PATH=/Users/alexl/.local/bin:$PATH
+VIRTUALENVWRAPPER_PYTHON=$(which python3)
+
+export PATH=/usr/local/anaconda3/bin:"$PATH" 2> /dev/null
 
 # ------------------------ Shell History Configuration ------------------------
-setopt APPEND_HISTORY       # Don't overwrite, append!
-setopt INC_APPEND_HISTORY   # Write after each command
-setopt SHARE_HISTORY        # Killer: share history between multiple shells
+setopt extended_history       # record timestamp of command in HISTFILE
+setopt hist_expire_dups_first # delete duplicates first when HISTFILE size exceeds HISTSIZE
+setopt hist_ignore_dups       # ignore duplicated commands history list
+setopt hist_ignore_space      # ignore commands that start with space
+setopt hist_verify            # show command with history expansion to user before running it
+setopt inc_append_history     # add commands to HISTFILE in order of execution
+setopt share_history          # share command history data
 
 setopt HIST_IGNORE_DUPS     # Remove immediate duplicates
 setopt HIST_IGNORE_ALL_DUPS # No really, ignore duplicates
@@ -20,7 +29,6 @@ setopt HIST_REDUCE_BLANKS   # Why is this not a default?
 setopt HIST_IGNORE_SPACE    # Don't save left justified spaces
 setopt HIST_NO_STORE        # No really, fuck spaces
 setopt EXTENDED_HISTORY     # Save start time and wall time of command
-
 
 # ------------------------------ Completion Stuff ------------------------------
 
@@ -56,6 +64,16 @@ zstyle ':completion:*' file-sort modification reverse
 zstyle ':completion:*' list-colors "=(#b) #([0-9]#)*=36=31"
 
 unsetopt LIST_AMBIGUOUS
+
+function load_ssh_keys {
+    declare -a potential_keys=("~/.ssh/github" "~/.ssh/versive_github"  "~/.ssh/esentire_github" "~/.ssh/general_key" "~/.ssh/github")
+
+    eval $(ssh-agent -s)
+    for key in "${potential_keys[@]}"
+    do
+        ssh-add $key &> /dev/null
+    done
+}
 
 # ---------------------------------- Prompt ----------------------------------
 # This was the source used to create this

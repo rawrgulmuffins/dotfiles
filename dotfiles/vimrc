@@ -128,7 +128,8 @@ set spell                   " Turn on spell check
 "                   |___/             |___/
 "
 autocmd BufRead,BufNewFile *.html setlocal filetype=htmldjango
-autocmd BufNewFile,BufRead *.jinja set syntax=html
+autocmd BufNewFile,BufRead *.jinja setlocal filetype=htmldjango
+autocmd BufNewFile,BufRead *.j2 setlocal filetype=htmldjango
 
 autocmd FileType python setlocal shiftwidth=4 softtabstop=4 tabstop=4
 

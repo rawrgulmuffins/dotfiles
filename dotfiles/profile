@@ -17,6 +17,7 @@
 # Determine what (Bourne compatible) shell we are running under. Put the result
 # in $PROFILE_SHELL (not $SHELL) so further code can depend on the shell type.
 
+
 set -uo pipefail
 IFS=$'\n\t'
 
@@ -36,31 +37,13 @@ else
   PROFILE_SHELL=sh
 fi
 
-
-#Aliases
-alias gvim="UBUNTU_MENUPROXY= gvim"
+export PATH=/Users/alexl/.local/bin:$PATH
 
 #configs
 export EDITOR="vim"
 export VISUAL="$EDITOR"
 export EDITOR="$VISUAL"
 
-# Isilon exports
-export DUCTTAPE_OWNER="alord"
-
-# This fixes a tmux and virtualenv interaction issue.
-export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python
-#set up virtualenvwrapper
-
-WRAPPER_FAILURE_MESSAGE="virtualenvwrapper.sh not found"
-if [ -x "$(command -v virtualenvwrapper.sh)" ]; then
-    # Should work if you installed virtualenvwrapper via pipe, apt-get, or pkg
-    source `which virtualenvwrapper.sh`
-fi
-
-# TODO: Look into venv and it's setup process
-
-export PATH=$PATH:/home/alord/bin
 
 #colored manpages
 export LESS_TERMCAP_mb=$'\E[01;31m'
@@ -97,24 +80,3 @@ function extract()      # Handy Extract Program
         echo "'$1' is not a valid file!"
     fi
 }
-
-# SSH key adding
-eval "$(ssh-agent -s)" > /dev/null
-ssh-add ~/.ssh/id_rsa_github &> /dev/null
-ssh-add ~/.ssh/id_rsa_github_west  &> /dev/null
-ssh-add ~/.ssh/id_rsa_github.com &> /dev/null
-ssh-add ~/.ssh/github.com &> /dev/null
-
-# Git fooery
-
-# fetch from aribitrary git remotes in a loop
-function fetch_remotes() {
-    for user in $*
-    do
-        git fetch $user
-    done
-}
-
-# Isilon fetches
-# Fetch updates for Duct Tape repos.
-alias dtup='fetch_remotes origin rludvigsen rsiemens rsteele sdouglas2 toguara upstream'
