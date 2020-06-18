@@ -9,6 +9,7 @@ export PATH=/Users/alexl/.local/bin:$PATH
 VIRTUALENVWRAPPER_PYTHON=$(which python3)
 
 export PATH=/usr/local/anaconda3/bin:"$PATH" 2> /dev/null
+export PATH="/usr/local/opt/make/libexec/gnubin:$PATH"
 
 # ------------------------ Shell History Configuration ------------------------
 setopt extended_history       # record timestamp of command in HISTFILE
@@ -66,13 +67,10 @@ zstyle ':completion:*' list-colors "=(#b) #([0-9]#)*=36=31"
 unsetopt LIST_AMBIGUOUS
 
 function load_ssh_keys {
-    declare -a potential_keys=("~/.ssh/github" "~/.ssh/versive_github"  "~/.ssh/esentire_github" "~/.ssh/general_key" "~/.ssh/github")
+    #declare -a potential_keys=("/Users/alexl/.ssh/github" "/Users/alexl/.ssh/versive_github"  "/Users/alexl/.ssh/esentire_github" "/Users/alexl/.ssh/general_key" "/Users/alexl/.ssh/github")
 
     eval $(ssh-agent -s)
-    for key in "${potential_keys[@]}"
-    do
-        ssh-add $key &> /dev/null
-    done
+    ssh-add "/Users/alexl/.ssh/github" "/Users/alexl/.ssh/versive_github"  "/Users/alexl/.ssh/esentire_github" "/Users/alexl/.ssh/general_key" "/Users/alexl/.ssh/github"
 }
 
 # ---------------------------------- Prompt ----------------------------------
@@ -81,3 +79,6 @@ function load_ssh_keys {
 #
 autoload colors && colors
 PS1='%F{cyan}%n@%m %~%f %(?.%F{green}:).%F{red}[%?] :( )%#%f '
+export PATH="/usr/local/opt/libpq/bin:$PATH"
+
+load_ssh_keys

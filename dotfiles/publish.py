@@ -10,6 +10,8 @@ files_to_publish = [
     ("ipythonrc", ".ipythonrc"),
     ("vimrc", ".vimrc"),
     ("vimrc", ".nvimrc"),
+    ("tmux.conf", ".tmux.conf"),
+    ("pip.conf", ".pip/pip.conf"),
     ("gitconfig", ".gitconfig"),]
 
 current_files = os.listdir(".")

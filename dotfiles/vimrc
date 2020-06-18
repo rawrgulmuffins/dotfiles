@@ -24,19 +24,20 @@ Plugin 'VundleVim/Vundle.vim'
 "
 " Development Environment
 Plugin 'justinmk/vim-sneak'
+Plugin 'dense-analysis/ale'
 " Plugin 'tpope/vim-commentary'
 " Plugin 'tpope/vim-surround'
 " Plugin 'tpope/vim-repeat'
-" Plugin 'junegunn/fzf'
-" Plugin 'junegunn/fzf.vim'            " Requires fzf to work.
+Plugin 'junegunn/fzf'
+Plugin 'junegunn/fzf.vim'
 " Plugin 'suan/vim-instant-markdown'
 " Plugin 'Valloric/YouCompleteMe'
 " Plugin 'w0rp/ale'
 " Plugin 'fisadev/vim-isort'
 " Plugin 'junegunn/goyo.vim'
 " Plugin 'junegunn/limelight.vim'
-Plugin 'scrooloose/nerdtree'
-" Plugin 'Xuyuanp/nerdtree-git-plugin' " Requires nerdtree to work
+Plugin 'hashivim/vim-terraform'
+
 
 " Beautification
 " Plugin 'bling/vim-bufferline'
@@ -99,7 +100,6 @@ set shiftround              " rounds indent to a multiple of shiftwidth
 set matchpairs+=<:>         " show matching <> (html mainly) as well
 set foldmethod=indent       " allow us to fold on indents
 set foldlevel=99            " don't fold by default
-set textwidth=79            " Wrap text to next line if over the text limit
 
 " These next three commands are to make hashs work with smart indent
 set cindent                 "
@@ -121,8 +121,18 @@ set wildmode=longest,list,full " Give the first list in list format
 
 """ Spelling and grammar
 set spell                   " Turn on spell check
-set spellfile=~/.vim/spell/techspeak.utf-8.add " Teach Vim the tech lingos
 
+""" Set the status line format and colors
+""" https://stackoverflow.com/questions/20979403/adding-number-of-lines-in-file-to-vim-status-bar/51642945
+set statusline =%1*\ %n\ %*             "buffer number
+set statusline +=%5*%{&ff}%*            "file format
+set statusline +=%3*%y%*                "file type
+set statusline +=%4*\ %<%F%*            "full path
+set statusline +=%2*%m%*                "modified flag
+set statusline +=%1*%=%5l%*             "current line
+set statusline +=%2*/%L%*               "total lines
+set statusline +=%1*%4v\ %*             "virtual column number
+set statusline +=%2*0x%04B\ %*          "character under cursor
 
 "  _
 " | |    __ _ _ __   __ _ _   _  __ _  __ _  ___  ___
@@ -134,8 +144,10 @@ set spellfile=~/.vim/spell/techspeak.utf-8.add " Teach Vim the tech lingos
 autocmd BufRead,BufNewFile *.html setlocal filetype=htmldjango
 autocmd BufNewFile,BufRead *.jinja setlocal filetype=htmldjango
 autocmd BufNewFile,BufRead *.j2 setlocal filetype=htmldjango
+autocmd BufNewFile,BufRead Jenkinsfile setf groovy
 
-autocmd FileType python setlocal shiftwidth=4 softtabstop=4 tabstop=4
+autocmd FileType python setlocal shiftwidth=4 softtabstop=4 tabstop=4 textwidth=79
+autocmd FileType groovy setlocal shiftwidth=2 softtabstop=2 tabstop=2
 
 autocmd FileType htmldjango setlocal shiftwidth=2 softtabstop=2 tabstop=2
 autocmd FileType css setlocal shiftwidth=2 softtabstop=2 tabstop=2
@@ -216,6 +228,13 @@ colorscheme afterglow
 hi Search cterm=NONE ctermbg=DarkMagenta ctermfg=white  guibg=DarkMagenta guifg=white
 hi Visual cterm=NONE ctermbg=darkblue ctermfg=white  guibg=darkblue guifg=white
 
+""" Status Bar Colors
+hi User1 guifg=#eea040 guibg=#222222
+hi User2 guifg=#dd3333 guibg=#222222
+hi User3 guifg=#ff66ff guibg=#222222
+hi User4 guifg=#a0ee40 guibg=#222222
+hi User5 guifg=#eeee40 guibg=#222222
+
 " Highlight trailing whitespaces and tabs
 highlight ExtraWhitespace ctermbg=red
 match ExtraWhitespace /\s\+$/
@@ -241,3 +260,6 @@ endfunction
 
 " NB: this supports "rp that replaces the selection by the contents of @r
 vnoremap <silent> <expr> p <sid>Repl()
+
+" Asynchronous Lint Engine Configuration
+let g:ale_fix_on_save = 1
