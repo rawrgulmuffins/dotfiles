@@ -26,7 +26,7 @@ Plugin 'VundleVim/Vundle.vim'
 Plugin 'justinmk/vim-sneak'
 Plugin 'dense-analysis/ale'
 " Plugin 'tpope/vim-commentary'
-" Plugin 'tpope/vim-surround'
+Plugin 'tpope/vim-surround'
 " Plugin 'tpope/vim-repeat'
 Plugin 'junegunn/fzf'
 Plugin 'junegunn/fzf.vim'
@@ -37,6 +37,9 @@ Plugin 'junegunn/fzf.vim'
 " Plugin 'junegunn/goyo.vim'
 " Plugin 'junegunn/limelight.vim'
 Plugin 'hashivim/vim-terraform'
+Plugin 'lifepillar/pgsql.vim'
+" Plugin That Lets You Do Increasing Numbers, Dates, Or Daynames
+Plugin 'vim-scripts/VisIncr'
 
 
 " Beautification
@@ -160,6 +163,9 @@ autocmd FileType yaml setlocal shiftwidth=2 softtabstop=2 tabstop=2
 autocmd FileType puppet setlocal shiftwidth=2 softtabstop=2 tabstop=2
 
 autocmd FileType tex setlocal shiftwidth=2 softtabstop=2 tabstop=2
+
+" psql highlighting from https://github.com/lifepillar/pgsql.vim
+let g:sql_type_default = 'pgsql'
 " TODO: autocmd for java
 " TODO: autocmd for rust
 " TODO: autocmd for go

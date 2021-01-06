@@ -79,3 +79,8 @@ function extract()      # Handy Extract Program
         echo "'$1' is not a valid file!"
     fi
 }
+
+# Adding github.com and git.eng.esentire.com GPG key
+export GPG_TTY=$(tty)
+
+export PATH="$HOME/.cargo/bin:$PATH"

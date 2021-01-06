@@ -5,11 +5,11 @@
 # Start out by pulling all of the basic unix shell configuration.
 #emulate sh -c '. ~/.profile'
 #
-export PATH=/Users/alexl/.local/bin:$PATH
-VIRTUALENVWRAPPER_PYTHON=$(which python3)
-
-export PATH=/usr/local/anaconda3/bin:"$PATH" 2> /dev/null
+export PATH="/usr/local/opt/python@3.8/bin:$PATH"
 export PATH="/usr/local/opt/make/libexec/gnubin:$PATH"
+
+# eSentire Specific bin
+export PATH=$HOME/.esentire/bin:$PATH
 
 # ------------------------ Shell History Configuration ------------------------
 setopt extended_history       # record timestamp of command in HISTFILE
@@ -67,11 +67,15 @@ zstyle ':completion:*' list-colors "=(#b) #([0-9]#)*=36=31"
 unsetopt LIST_AMBIGUOUS
 
 function load_ssh_keys {
-    #declare -a potential_keys=("/Users/alexl/.ssh/github" "/Users/alexl/.ssh/versive_github"  "/Users/alexl/.ssh/esentire_github" "/Users/alexl/.ssh/general_key" "/Users/alexl/.ssh/github")
 
     eval $(ssh-agent -s)
-    ssh-add "/Users/alexl/.ssh/github" "/Users/alexl/.ssh/versive_github"  "/Users/alexl/.ssh/esentire_github" "/Users/alexl/.ssh/general_key" "/Users/alexl/.ssh/github"
+    ssh-add "/Users/alordthorsen/.ssh/git.eng.esentire.com" "/Users/alordthorsen/.ssh/rawrgulsmuffins_github.com"
 }
+
+# ------------------------------ Aliases ------------------------------
+alias ls='exa -la --git'
+alias rg='rg --smart-case'
+alias cat='bat'
 
 # ---------------------------------- Prompt ----------------------------------
 # This was the source used to create this
