@@ -67,9 +67,8 @@ zstyle ':completion:*' list-colors "=(#b) #([0-9]#)*=36=31"
 unsetopt LIST_AMBIGUOUS
 
 function load_ssh_keys {
-
     eval $(ssh-agent -s)
-    ssh-add "/Users/alordthorsen/.ssh/git.eng.esentire.com" "/Users/alordthorsen/.ssh/rawrgulsmuffins_github.com"
+    ssh-add "${HOME}/.ssh/esentire_github" "${HOME}/.ssh/rawrgulmuffins_github"
 }
 
 # ------------------------------ Aliases ------------------------------
