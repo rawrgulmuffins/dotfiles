@@ -10,7 +10,6 @@ from pathlib import Path
 
 SOURCE_DIR = Path(__file__).resolve().parent
 
-# Source path in this directory, destination relative to the home directory.
 HOME_LINKS: list[tuple[str, str]] = [
     ("zshenv", ".zshenv"),
     ("zshrc", ".zshrc"),
@@ -18,7 +17,6 @@ HOME_LINKS: list[tuple[str, str]] = [
     ("gitconfig", ".gitconfig"),
 ]
 
-# Source path in this directory, destination relative to the config directory.
 # zsh, Neovim, and git all look in $XDG_CONFIG_HOME when it's set.
 CONFIG_LINKS: list[tuple[str, str]] = [
     ("zsh", "zsh"),

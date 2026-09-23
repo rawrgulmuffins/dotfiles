@@ -1,6 +1,5 @@
--- Server definitions come from nvim-lspconfig. A server is enabled only when
--- its executable is on PATH, so a machine missing one doesn't produce an
--- error on every file open.
+-- Enabled only when the executable is on PATH, so a machine missing one
+-- doesn't produce an error on every file open.
 
 vim.lsp.config("pyright", {
   settings = {
@@ -12,8 +11,8 @@ vim.lsp.config("pyright", {
 })
 
 local servers = {
-  "pyright", -- type checking
-  "ruff", -- linting
+  "pyright",
+  "ruff",
   "bashls",
   "terraformls",
 }
@@ -35,7 +34,6 @@ vim.api.nvim_create_autocmd("LspAttach", {
       client.server_capabilities.hoverProvider = false
     end
 
-    -- Neovim maps grn, gra, grr, gri, and K by default. gd is not one of them.
     vim.keymap.set("n", "gd", vim.lsp.buf.definition, { buffer = event.buf })
   end,
 })

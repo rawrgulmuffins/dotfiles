@@ -1,5 +1,3 @@
-# Infracost API key, read from a file that is never committed.
-
 if [[ -r ~/.infracost_api_key ]]; then
     export INFRACOST_API_KEY="$(<~/.infracost_api_key)"
 else

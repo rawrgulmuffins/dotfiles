@@ -1,29 +1,23 @@
 local autocmd = vim.api.nvim_create_autocmd
 
--- Filetype detection
 vim.filetype.add({
   extension = {
     html = "htmldjango",
     jinja = "htmldjango",
     j2 = "htmldjango",
-    -- Neovim guesses between TinyFugue and Terraform from file content, and
-    -- a new empty file comes out as TinyFugue.
     tf = "terraform",
   },
   pattern = {
-    -- Shell templates get sh highlighting and formatting, not htmldjango.
     [".*%.sh%.j2"] = {
       function()
         return "sh", function(bufnr)
           vim.b[bufnr].is_bash = 1
         end
       end,
-      { priority = 10 },
     },
   },
 })
 
--- Per-filetype indentation
 local two_space_filetypes = {
   "css",
   "eruby",
@@ -60,7 +54,7 @@ autocmd("FileType", {
   end,
 })
 
--- Markdown preview. peek.nvim is only installed when deno is on PATH.
+-- peek.nvim is only installed when deno is on PATH.
 autocmd("FileType", {
   pattern = "markdown",
   callback = function(event)
@@ -83,8 +77,8 @@ autocmd("FileType", {
   end,
 })
 
--- Colors. The overrides are reapplied whenever the colorscheme changes, since
--- loading a colorscheme clears custom highlights.
+-- Reapplied on every colorscheme change, since loading a colorscheme clears
+-- custom highlights.
 autocmd("ColorScheme", {
   callback = function()
     local highlight = vim.api.nvim_set_hl
@@ -92,7 +86,6 @@ autocmd("ColorScheme", {
     highlight(0, "Visual", { fg = "white", bg = "DarkBlue", ctermfg = "white", ctermbg = "DarkBlue" })
     highlight(0, "ExtraWhitespace", { bg = "red", ctermbg = "red" })
 
-    -- Status line segments
     highlight(0, "User1", { fg = "#eea040", bg = "#222222" })
     highlight(0, "User2", { fg = "#dd3333", bg = "#222222" })
     highlight(0, "User3", { fg = "#ff66ff", bg = "#222222" })
@@ -101,8 +94,7 @@ autocmd("ColorScheme", {
   end,
 })
 
--- Highlight trailing whitespace. :match is per window, so it's set on every
--- window a buffer is shown in.
+-- :match is per window, so it's set on every window a buffer is shown in.
 autocmd({ "BufWinEnter", "WinNew" }, {
   callback = function()
     vim.cmd([[match ExtraWhitespace /\s\+$/]])

@@ -6,16 +6,13 @@ export VISUAL="$EDITOR"
 # Lets gpg prompt for a passphrase in the terminal, for signed commits.
 export GPG_TTY=$(tty)
 
-# Vi keybindings on the command line. Set explicitly, since zsh otherwise picks
-# the keymap from $EDITOR. KEYTIMEOUT is in hundredths of a second, and the
-# default of 40 makes Esc wait before switching to command mode.
+# Set explicitly, since zsh otherwise picks the keymap from $EDITOR.
+# KEYTIMEOUT is in hundredths of a second, and the default of 40 makes Esc
+# wait before switching to command mode.
 bindkey -v
 KEYTIMEOUT=1
 
 # ---------------------------------- Modules ----------------------------------
-# Optional pieces of config live in $ZSH_CONFIG_DIR/modules, one file each.
-# The OS modules load automatically. Everything else is opted into from
-# ~/.zshrc.local, which is sourced at the end of this file and never committed.
 ZSH_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/zsh"
 
 load_zsh_module() {
@@ -35,22 +32,20 @@ elif [[ -r /proc/version && "$(</proc/version)" == *[Mm]icrosoft* ]]; then
 fi
 
 # ------------------------ Shell History Configuration ------------------------
-# zsh saves no history unless these are set. macOS sets them in /etc/zshrc,
-# Ubuntu doesn't.
 HISTFILE="$HOME/.zsh_history"
 HISTSIZE=100000
 SAVEHIST=100000
 
-setopt EXTENDED_HISTORY       # Save start time and wall time of command
-setopt SHARE_HISTORY          # Append each command as it runs and read other shells' commands
-setopt HIST_EXPIRE_DUPS_FIRST # Delete duplicates first when trimming to HISTSIZE
-setopt HIST_IGNORE_ALL_DUPS   # Drop an older copy of a command when it's repeated
+setopt EXTENDED_HISTORY
+setopt SHARE_HISTORY
+setopt HIST_EXPIRE_DUPS_FIRST
+setopt HIST_IGNORE_ALL_DUPS
 setopt HIST_SAVE_NO_DUPS
 setopt HIST_FIND_NO_DUPS
-setopt HIST_IGNORE_SPACE      # Don't save commands that start with a space
+setopt HIST_IGNORE_SPACE
 setopt HIST_REDUCE_BLANKS     # Why is this not a default?
-setopt HIST_NO_STORE          # Don't save the history command itself
-setopt HIST_VERIFY            # Show a history expansion before running it
+setopt HIST_NO_STORE
+setopt HIST_VERIFY
 
 # ------------------------------ Completion Stuff ------------------------------
 
@@ -106,8 +101,7 @@ autoload -U bashcompinit && bashcompinit
 #eval "$(register-python-argcomplete pipx)"
 
 # ------------------------------ Alias Functions ------------------------------
-# Deletes local branches whose changes are already squash-merged into the
-# default branch. Commented out until it's been run against a real repo.
+# Commented out until it's been run against a real repo.
 #prune_squash_merged_branches() {
 #    export default_branch=$(git remote show origin | sed -n '/HEAD branch/s/.*: //p')
 #    git checkout -q ${default_branch}
@@ -167,8 +161,6 @@ fi
 PS1='%F{cyan}%n@%m %~%f %(?.%F{green}:).%F{red}[%?] :( )%#%f '
 
 # ------------------------------- FZF Configs ---------------------------------
-# Ctrl-R history search, Ctrl-T file search, and ** completion. `fzf --zsh`
-# needs fzf 0.48 or newer.
 if (( $+commands[fzf] )); then
     source <(fzf --zsh)
 fi
@@ -298,8 +290,7 @@ add-zsh-hook precmd tmux_rename_window
 add-zsh-hook preexec tmux_rename_window_preexec
 
 # ------------------------------- Local config --------------------------------
-# Machine- and employer-specific settings, including which optional modules
-# to load. See zsh/zshrc.local.example.
+# Sourced last so machine- and employer-specific settings override the above.
 if [[ -r ~/.zshrc.local ]]; then
     source ~/.zshrc.local
 fi

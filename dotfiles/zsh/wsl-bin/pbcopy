@@ -1,6 +1,6 @@
 #!/bin/sh
-# Copy stdin to the Windows clipboard. win32yank handles UTF-8 correctly.
-# clip.exe reads input in the console code page and mangles non-ASCII text.
+# win32yank first, since clip.exe reads input in the console code page and
+# mangles non-ASCII text.
 # clip.exe is called by full path so this works with appendWindowsPath=false.
 if command -v win32yank.exe >/dev/null 2>&1; then
     exec win32yank.exe -i --crlf

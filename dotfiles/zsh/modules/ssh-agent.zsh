@@ -1,8 +1,6 @@
-# Load ssh keys into one agent shared by every shell. Uses keychain, which
-# reuses a running agent instead of starting a new one per shell.
-#
-# Keys are listed one file name per line in ~/.ssh/load_keys, relative to
-# ~/.ssh. That file is never committed, since key names reveal hosts.
+# keychain reuses a running agent, so every shell shares one instead of each
+# starting its own. Key names live in ~/.ssh/load_keys, outside the repo, since
+# they reveal hosts.
 
 if (( ! $+commands[keychain] )); then
     print -u2 "ssh-agent module: keychain is not installed"
@@ -14,7 +12,6 @@ if [[ ! -r ~/.ssh/load_keys ]]; then
     return 1
 fi
 
-# ${(f)...} splits the file on newlines. The :# filter drops blank lines.
 ssh_key_names=(${(f)"$(<~/.ssh/load_keys)"})
 ssh_key_names=(${ssh_key_names:#})
 eval "$(keychain --eval --quiet "${ssh_key_names[@]}")"

@@ -8,7 +8,7 @@ apply to some machines.
 | --- | --- |
 | `modules/macos.zsh` | Homebrew paths. Loads automatically on macOS. |
 | `modules/wsl.zsh` | Puts `wsl-bin` on `PATH` and sets `BROWSER`. Loads automatically under WSL. |
-| `modules/ssh-agent.zsh` | Opt-in. Loads the keys listed in `~/.ssh/load_keys` into one agent through `keychain`. |
+| `modules/ssh-agent.zsh` | Opt-in. Loads the keys listed in `~/.ssh/load_keys`, one file name per line relative to `~/.ssh`, into one agent through `keychain`. |
 | `modules/infracost.zsh` | Opt-in. Exports `INFRACOST_API_KEY` from `~/.infracost_api_key`. |
 | `wsl-bin/` | `wslview` and `pbcopy` shims that call into Windows. |
 | `zshrc.local.example` | Starting point for `~/.zshrc.local`. |

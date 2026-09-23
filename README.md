@@ -3,6 +3,68 @@ dotfiles
 
 All of the configuration files configured to my personal taste
 
+How it's organized
+------------------
+
+The config comes in three layers:
+
+- Shared files in this repo apply on every machine.
+- Modules add pieces that only apply on some machines. The macOS and WSL
+  modules load on their own. Others, like `ssh-agent`, load only when a
+  machine asks for them.
+- Local files stay on one machine and are never committed. They hold the
+  git identity, employer-specific settings, and the list of modules to load.
+
+The local files load last, so they can override anything else.
+
+| In this repo | Installed at | Purpose |
+| --- | --- | --- |
+| `dotfiles/zshenv` | `~/.zshenv` | Read by every zsh, before `~/.zshrc` |
+| `dotfiles/zshrc` | `~/.zshrc` | History, completion, prompt, aliases, and functions for interactive shells |
+| `dotfiles/zsh/` | `~/.config/zsh` | zsh modules and the WSL helper scripts |
+| `dotfiles/nvim/` | `~/.config/nvim` | Neovim config and its plugin lockfile |
+| `dotfiles/tmux.conf` | `~/.tmux.conf` | tmux |
+| `dotfiles/gitconfig` | `~/.gitconfig` | git aliases and push/pull behavior |
+| `dotfiles/git_ignore` | `~/.config/git/ignore` | Files git ignores in every repo |
+| `dotfiles/zsh/zshrc.local.example` | copied to `~/.zshrc.local` | Starting point for local zsh settings |
+| `dotfiles/gitconfig.local.example` | copied to `~/.gitconfig.local` | Starting point for local git settings |
+| `dotfiles/python_gitignore` | not installed | `.gitignore` template for new Python projects |
+
+`publish.py` creates the links. The `.local` files are copies, since they're
+edited per machine. When `$XDG_CONFIG_HOME` is set, the `~/.config` links go
+there instead.
+
+### Load order
+
+zsh reads its files in this order:
+
+1. `~/.zshenv`
+2. `~/.zshrc`, which loads the macOS or WSL module near the top
+3. `~/.zshrc.local`, sourced at the end of `~/.zshrc`, which loads any opt-in
+   modules with `load_zsh_module <name>`
+
+git reads `~/.gitconfig` and then `~/.gitconfig.local`, which is included at
+the end.
+
+Neovim starts at `init.lua`, which loads the files in `lua/config/` in this
+order:
+
+1. `options.lua` sets editor options, plus plugin settings that have to exist
+   before the plugins load.
+2. `plugins.lua` installs the plugins and sets up formatting and linting.
+3. `lsp.lua` turns on the language servers that are installed.
+4. `keymaps.lua` holds the key mappings.
+5. `autocmds.lua` covers filetype detection, per-language indentation, and
+   colors.
+
+### Where a change goes
+
+- A setting for every machine goes in the shared file.
+- A setting for one operating system goes in that OS's module.
+- Something optional goes in a new module, which each machine then turns on
+  from `~/.zshrc.local`.
+- Anything personal, secret, or employer-specific goes in a `.local` file.
+
 Install
 -------
 

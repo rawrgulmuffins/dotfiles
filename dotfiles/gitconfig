@@ -15,8 +15,6 @@
 [branch]
 	autoSetupMerge = simple
 
-# Identity, hosting-provider auth, and anything specific to one machine or
-# employer. Never committed.
-# See gitconfig.local.example. Included last so it can override the above.
+# Included last so local settings override the above.
 [include]
 	path = ~/.gitconfig.local

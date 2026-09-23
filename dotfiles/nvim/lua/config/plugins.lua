@@ -1,7 +1,3 @@
--- Plugins are managed by vim.pack. Exact revisions are pinned in
--- nvim-pack-lock.json next to init.lua. Update with :lua vim.pack.update()
--- and commit the lockfile afterward.
-
 local function github(repo)
   return "https://github.com/" .. repo
 end
@@ -18,25 +14,20 @@ vim.api.nvim_create_autocmd("PackChanged", {
 })
 
 local specs = {
-  -- Editing
   github("justinmk/vim-sneak"),
   github("tpope/vim-repeat"),
   github("tpope/vim-surround"),
 
-  -- Git
   github("lewis6991/gitsigns.nvim"),
   github("tpope/vim-fugitive"),
 
-  -- Finding files and text. Uses the fzf and rg binaries.
   github("ibhagwan/fzf-lua"),
 
-  -- Language support
   github("neovim/nvim-lspconfig"),
   github("stevearc/conform.nvim"),
   github("mfussenegger/nvim-lint"),
   github("lifepillar/pgsql.vim"),
 
-  -- UI
   github("ap/vim-buftabline"),
   github("rafi/awesome-vim-colorschemes"),
 }
@@ -50,8 +41,6 @@ vim.pack.add(specs)
 require("gitsigns").setup({
   on_attach = function(bufnr)
     local gitsigns = require("gitsigns")
-    -- ]c and [c jump between hunks, as they did with vim-gitgutter. In diff
-    -- mode they keep their built-in meaning.
     vim.keymap.set("n", "]c", function()
       if vim.wo.diff then
         vim.cmd.normal({ "]c", bang = true })
@@ -73,10 +62,6 @@ require("fzf-lua").setup({})
 
 require("conform").setup({
   formatters_by_ft = {
-    -- Import sorting plus formatting, the same job black and isort did
-    -- under ALE. Lint autofixes (ruff check --fix) are left off so saving
-    -- never deletes an import that is unused only because the code using it
-    -- isn't written yet.
     python = { "ruff_organize_imports", "ruff_format" },
     sh = { "shfmt" },
     sql = { "sqlfluff" },
@@ -88,8 +73,8 @@ require("conform").setup({
     sqlfluff = {
       args = { "fix", "--dialect=postgres", "-" },
       require_cwd = false,
-      -- sqlfluff exits 1 when violations remain that it can't fix, but still
-      -- prints the fixed SQL. Treating that as failure would discard the fixes.
+      -- NOTE: sqlfluff exits 1 when violations remain that it can't fix, but
+      -- still prints the fixed SQL. Treating that as failure discards the fixes.
       exit_codes = { 0, 1 },
     },
   },
@@ -99,16 +84,12 @@ require("conform").setup({
   },
 })
 
--- conform skips formatters that aren't installed, but nvim-lint raises an
--- error on every buffer enter. Only register sqlfluff when it exists.
 local lint = require("lint")
 lint.linters_by_ft = {}
 if vim.fn.executable("sqlfluff") == 1 then
   lint.linters_by_ft.sql = { "sqlfluff" }
 end
 lint.linters.sqlfluff.args = { "lint", "--format=json", "--dialect=postgres", "-" }
--- BufEnter rather than BufReadPost, since filetype detection hasn't run yet
--- when this config's BufReadPost autocmds fire.
 vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePost", "InsertLeave" }, {
   callback = function()
     lint.try_lint()
