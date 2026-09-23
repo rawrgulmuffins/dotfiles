@@ -1,0 +1,7 @@
+#!/bin/sh
+# Open a URL, or a file by its Linux path, in the default Windows application.
+target="$1"
+if [ -e "$target" ]; then
+    target=$(wslpath -w "$target")
+fi
+exec explorer.exe "$target"

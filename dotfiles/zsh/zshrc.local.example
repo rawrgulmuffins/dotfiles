@@ -1,0 +1,9 @@
+# Copy to ~/.zshrc.local and edit. This file is sourced at the end of ~/.zshrc
+# and holds anything specific to one machine or one employer.
+
+# Optional modules from ~/.config/zsh/modules
+# load_zsh_module ssh-agent
+# load_zsh_module infracost
+
+# Work-specific aliases
+# [[ -r ~/.work_aliases ]] && source ~/.work_aliases

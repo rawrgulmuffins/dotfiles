@@ -1,35 +1,50 @@
-# In order for the prompt to work correctly you'll need to git clone
-# https://github.com/sindresorhus/pure then pull async.zsh and pure.zsh.
-# Both files (or symlinks) need to end up in $HOME/.zfunctions
+export PATH="$HOME/.local/bin:$PATH"
 
-# Start out by pulling all of the basic unix shell configuration.
-#emulate sh -c '. ~/.profile'
-#
-export PATH="/usr/local/opt/python@3.8/bin:$PATH"
-export PATH="/usr/local/opt/make/libexec/gnubin:$PATH"
+export EDITOR="nvim"
+export VISUAL="$EDITOR"
 
-# eSentire Specific bin
-export PATH=$HOME/.esentire/bin:$PATH
+# Lets gpg prompt for a passphrase in the terminal, for signed commits.
+export GPG_TTY=$(tty)
+
+# ---------------------------------- Modules ----------------------------------
+# Optional pieces of config live in $ZSH_CONFIG_DIR/modules, one file each.
+# The OS modules load automatically. Everything else is opted into from
+# ~/.zshrc.local, which is sourced at the end of this file and never committed.
+ZSH_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/zsh"
+
+load_zsh_module() {
+    local module_file="$ZSH_CONFIG_DIR/modules/$1.zsh"
+    if [[ -r "$module_file" ]]; then
+        source "$module_file"
+    else
+        print -u2 "zshrc: module '$1' not found at $module_file"
+        return 1
+    fi
+}
+
+if [[ "$OSTYPE" == darwin* ]]; then
+    load_zsh_module macos
+elif [[ -r /proc/version && "$(</proc/version)" == *[Mm]icrosoft* ]]; then
+    load_zsh_module wsl
+fi
 
 # ------------------------ Shell History Configuration ------------------------
-setopt extended_history       # record timestamp of command in HISTFILE
-setopt hist_expire_dups_first # delete duplicates first when HISTFILE size exceeds HISTSIZE
-setopt hist_ignore_dups       # ignore duplicated commands history list
-setopt hist_ignore_space      # ignore commands that start with space
-setopt hist_verify            # show command with history expansion to user before running it
-setopt inc_append_history     # add commands to HISTFILE in order of execution
-setopt share_history          # share command history data
+# zsh saves no history unless these are set. macOS sets them in /etc/zshrc,
+# Ubuntu doesn't.
+HISTFILE="$HOME/.zsh_history"
+HISTSIZE=100000
+SAVEHIST=100000
 
-setopt HIST_IGNORE_DUPS     # Remove immediate duplicates
-setopt HIST_IGNORE_ALL_DUPS # No really, ignore duplicates
+setopt EXTENDED_HISTORY       # Save start time and wall time of command
+setopt SHARE_HISTORY          # Append each command as it runs and read other shells' commands
+setopt HIST_EXPIRE_DUPS_FIRST # Delete duplicates first when trimming to HISTSIZE
+setopt HIST_IGNORE_ALL_DUPS   # Drop an older copy of a command when it's repeated
 setopt HIST_SAVE_NO_DUPS
-setopt HIST_EXPIRE_DUPS_FIRST
 setopt HIST_FIND_NO_DUPS
-
-setopt HIST_REDUCE_BLANKS   # Why is this not a default?
-setopt HIST_IGNORE_SPACE    # Don't save left justified spaces
-setopt HIST_NO_STORE        # No really, fuck spaces
-setopt EXTENDED_HISTORY     # Save start time and wall time of command
+setopt HIST_IGNORE_SPACE      # Don't save commands that start with a space
+setopt HIST_REDUCE_BLANKS     # Why is this not a default?
+setopt HIST_NO_STORE          # Don't save the history command itself
+setopt HIST_VERIFY            # Show a history expansion before running it
 
 # ------------------------------ Completion Stuff ------------------------------
 
@@ -58,30 +73,227 @@ zstyle ':completion:*:default' list-prompt '%S%M matches%s'
 # Don't prompt for a huge list, menu it!
 zstyle ':completion:*:default' menu 'select=0'
 
-# Have the newer files last so I see them first
+# Sort file completions by modification time, newest last. The list prints
+# below the command line, so the last row is the one nearest where the screen
+# settles on a long list. Drop 'reverse' to put newest at the top instead.
 zstyle ':completion:*' file-sort modification reverse
 
-# color code completion!!!!  Wohoo!
-zstyle ':completion:*' list-colors "=(#b) #([0-9]#)*=36=31"
+# Show file completions in ls -l format so the modification timestamp the sort
+# above is keyed on is actually visible in the list.
+zstyle ':completion:*' file-list all
+
+# Required for the paging that list-prompt above asks for, and for menu
+# selection. Not autoloaded by either style.
+zmodload zsh/complist
+
+# No list-colors here on purpose. file-list builds each row itself and hands it
+# to compadd as a pre-rendered display string, so complist never runs its color
+# pass over the result. Setting list-colors alongside file-list does nothing.
+# Colors are available only by dropping file-list and losing the timestamps.
 
 unsetopt LIST_AMBIGUOUS
 
-function load_ssh_keys {
-    eval $(ssh-agent -s)
-    ssh-add "${HOME}/.ssh/esentire_github" "${HOME}/.ssh/rawrgulmuffins_github"
+# bashcompinit lets tools that only ship bash completions (terraform's
+# `complete -C`, for one) register them here.
+autoload -U compinit && compinit
+autoload -U bashcompinit && bashcompinit
+#eval "$(register-python-argcomplete pipx)"
+
+# ------------------------------ Alias Functions ------------------------------
+# Deletes local branches whose changes are already squash-merged into the
+# default branch. Commented out until it's been run against a real repo.
+#prune_squash_merged_branches() {
+#    export default_branch=$(git remote show origin | sed -n '/HEAD branch/s/.*: //p')
+#    git checkout -q ${default_branch}
+#    git for-each-ref refs/heads/ "--format=%(refname:short)" | while read branch; do
+#      mergeBase=$(git merge-base ${default_branch} $branch)
+#      [[ $(git cherry ${default_branch} $(git commit-tree $(git rev-parse "$branch^{tree}") -p $mergeBase -m _)) == "-"* ]] &&
+#      git branch -D $branch; done
+#}
+
+urlencode() {
+    # urlencode <string>
+
+    old_lc_collate=$LC_COLLATE
+    LC_COLLATE=C
+
+    local length="${#1}"
+    for (( i = 0; i < length; i++ )); do
+        local c="${1:$i:1}"
+        case $c in
+            [a-zA-Z0-9.~_-]) printf '%s' "$c" ;;
+            *) printf '%%%02X' "'$c" ;;
+        esac
+    done
+
+    LC_COLLATE=$old_lc_collate
+}
+
+urldecode() {
+    # urldecode <string>
+
+    local url_encoded="${1//+/ }"
+    printf '%b' "${url_encoded//%/\\x}"
 }
 
 # ------------------------------ Aliases ------------------------------
-alias ls='exa -la --git'
+# Debian and Ubuntu install bat as batcat, since another package owns the name.
+if (( ! $+commands[bat] && $+commands[batcat] )); then
+    alias bat='batcat'
+fi
+if (( $+commands[lsd] )); then
+    alias ls='lsd -Al --sort=time --git --reverse --group-dirs=first'
+fi
+if (( $+commands[bat] || $+commands[batcat] )); then
+    alias cat='bat'
+fi
 alias rg='rg --smart-case'
-alias cat='bat'
+alias cdev='make -C ~/git/claude-dev-container run'
+
+if [ -f ~/.bash_aliases ]; then
+    source ~/.bash_aliases
+fi
 
 # ---------------------------------- Prompt ----------------------------------
 # This was the source used to create this
 # https://wiki.archlinux.org/index.php/zsh#Prompts
 #
-autoload colors && colors
 PS1='%F{cyan}%n@%m %~%f %(?.%F{green}:).%F{red}[%?] :( )%#%f '
-export PATH="/usr/local/opt/libpq/bin:$PATH"
 
-load_ssh_keys
+# ------------------------------- FZF Configs ---------------------------------
+# Ctrl-R history search, Ctrl-T file search, and ** completion. `fzf --zsh`
+# needs fzf 0.48 or newer.
+if (( $+commands[fzf] )); then
+    source <(fzf --zsh)
+fi
+
+# Add all session level secrets.
+[ -f ~/.secrets ] && source ~/.secrets
+
+# ---------------------------------- Functions ------------------------------------
+gcfb() {
+  local branch
+  branch=$(git symbolic-ref --short HEAD 2>/dev/null)
+  if [[ -z "$branch" ]]; then
+    echo "Not in a git repository or detached HEAD" >&2
+    return 1
+  fi
+
+  if [[ "$branch" =~ ^([A-Z]+-[0-9]+)-(.+)$ ]]; then
+    local ticket="${match[1]}"
+    local title="${match[2]}"
+    local message="${ticket}: ${title//-/ }"
+    echo "Committing with message: '$message'"
+    git commit -a -m "$message"
+  else
+    echo "Branch name '$branch' doesn't match expected pattern (e.g. SP-6970-Add-ECR-Targets)" >&2
+    return 1
+  fi
+}
+
+# Helper functions used by tmux to rename window panes based on the current directory
+# and git repo.
+tmux_rename_window_preexec() {
+  if [ -n "$TMUX" ]; then
+    local cmd="$1"
+    local mode
+    case "$cmd" in
+      vim*|nvim*)  mode="vim" ;;
+      psql*)       mode="psql" ;;
+      ssh*)        mode="ssh" ;;
+      *)           return ;;  # let precmd handle terminal
+    esac
+
+    local repo
+    repo=$(git rev-parse --show-toplevel 2>/dev/null)
+    local base
+    if [ -n "$repo" ]; then
+      base=$(basename "$repo")
+    else
+      base=$(basename "$PWD")
+    fi
+
+    tmux rename-window "${base}-${mode}"
+  fi
+}
+
+tmux_rename_window() {
+  if [ -n "$TMUX" ]; then
+    local pane_cmd
+    pane_cmd=$(tmux display-message -p '#{pane_current_command}')
+
+    local mode
+    case "$pane_cmd" in
+      vim|nvim)   mode="vim" ;;
+      psql)       mode="psql" ;;
+      ssh)        mode="ssh" ;;
+      *)          mode="terminal" ;;
+    esac
+
+    local repo
+    repo=$(git rev-parse --show-toplevel 2>/dev/null)
+    local base
+    if [ -n "$repo" ]; then
+      base=$(basename "$repo")
+    else
+      base=$(basename "$PWD")
+    fi
+
+    tmux rename-window "${base}-${mode}"
+  fi
+}
+
+pull-all-repos() {
+    local repo_root="${1:-$HOME/git}"
+    local repo_dir current_branch default_branch
+    local -a failed_repos
+
+    for repo_dir in "$repo_root"/*/; do
+      [[ -d "$repo_dir/.git" ]] || continue
+      repo_dir="${repo_dir%/}"
+      echo "==> ${repo_dir##*/}"
+      (
+        cd "$repo_dir" || exit 1
+        # Refresh from the remote rather than trusting a possibly-stale cached
+        # origin/HEAD -- a repo's default branch can be renamed upstream
+        # (develop -> main, etc.) without this clone ever finding out otherwise.
+        git remote set-head origin -a >/dev/null 2>&1
+        default_branch=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@')
+        if [[ -z "$default_branch" ]]; then
+          default_branch=$(git remote show origin 2>/dev/null | grep 'HEAD branch' | awk '{print $NF}')
+        fi
+        if [[ -z "$default_branch" ]]; then
+          echo "  could not determine default branch, skipping"
+          exit 1
+        fi
+        current_branch=$(git branch --show-current)
+        if [[ "$current_branch" != "$default_branch" ]]; then
+          git checkout "$default_branch" || exit 1
+        fi
+        git pull --ff-only
+      )
+      if (( $? != 0 )); then
+        failed_repos+=("${repo_dir##*/}")
+      fi
+    done
+
+    if (( ${#failed_repos[@]} > 0 )); then
+      echo
+      echo "Failed to pull:"
+      for repo_dir in "${failed_repos[@]}"; do
+        echo "  - $repo_dir"
+      done
+    fi
+  }
+
+autoload -U add-zsh-hook
+add-zsh-hook chpwd tmux_rename_window
+add-zsh-hook precmd tmux_rename_window
+add-zsh-hook preexec tmux_rename_window_preexec
+
+# ------------------------------- Local config --------------------------------
+# Machine- and employer-specific settings, including which optional modules
+# to load. See zsh/zshrc.local.example.
+if [[ -r ~/.zshrc.local ]]; then
+    source ~/.zshrc.local
+fi
