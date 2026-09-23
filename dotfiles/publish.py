@@ -4,19 +4,26 @@ Anything already at a destination that isn't the expected link is moved aside
 to a .bak file first, so nothing is overwritten. Safe to run repeatedly.
 """
 
+import os
 import time
 from pathlib import Path
 
 SOURCE_DIR = Path(__file__).resolve().parent
 
 # Source path in this directory, destination relative to the home directory.
-LINKS: list[tuple[str, str]] = [
+HOME_LINKS: list[tuple[str, str]] = [
+    ("zshenv", ".zshenv"),
     ("zshrc", ".zshrc"),
-    ("zsh", ".config/zsh"),
-    ("nvim", ".config/nvim"),
     ("tmux.conf", ".tmux.conf"),
     ("gitconfig", ".gitconfig"),
-    ("git_ignore", ".config/git/ignore"),
+]
+
+# Source path in this directory, destination relative to the config directory.
+# zsh, Neovim, and git all look in $XDG_CONFIG_HOME when it's set.
+CONFIG_LINKS: list[tuple[str, str]] = [
+    ("zsh", "zsh"),
+    ("nvim", "nvim"),
+    ("git_ignore", "git/ignore"),
 ]
 
 
@@ -45,8 +52,11 @@ def link(source: Path, destination: Path) -> None:
 
 def main() -> None:
     home = Path.home()
-    for source_name, destination_name in LINKS:
+    config_home = Path(os.environ.get("XDG_CONFIG_HOME") or home / ".config")
+    for source_name, destination_name in HOME_LINKS:
         link(SOURCE_DIR / source_name, home / destination_name)
+    for source_name, destination_name in CONFIG_LINKS:
+        link(SOURCE_DIR / source_name, config_home / destination_name)
 
 
 if __name__ == "__main__":

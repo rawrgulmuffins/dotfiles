@@ -14,15 +14,9 @@
 	rebase = true
 [branch]
 	autoSetupMerge = simple
-# HTTPS auth for GitHub goes through the gh CLI. Run `gh auth login` once.
-[credential "https://github.com"]
-	helper =
-	helper = !gh auth git-credential
-[credential "https://gist.github.com"]
-	helper =
-	helper = !gh auth git-credential
 
-# Identity and anything specific to one machine or employer. Never committed.
+# Identity, hosting-provider auth, and anything specific to one machine or
+# employer. Never committed.
 # See gitconfig.local.example. Included last so it can override the above.
 [include]
 	path = ~/.gitconfig.local

@@ -88,6 +88,9 @@ require("conform").setup({
     sqlfluff = {
       args = { "fix", "--dialect=postgres", "-" },
       require_cwd = false,
+      -- sqlfluff exits 1 when violations remain that it can't fix, but still
+      -- prints the fixed SQL. Treating that as failure would discard the fixes.
+      exit_codes = { 0, 1 },
     },
   },
   format_on_save = {

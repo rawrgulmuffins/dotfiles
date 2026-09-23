@@ -6,6 +6,12 @@ export VISUAL="$EDITOR"
 # Lets gpg prompt for a passphrase in the terminal, for signed commits.
 export GPG_TTY=$(tty)
 
+# Vi keybindings on the command line. Set explicitly, since zsh otherwise picks
+# the keymap from $EDITOR. KEYTIMEOUT is in hundredths of a second, and the
+# default of 40 makes Esc wait before switching to command mode.
+bindkey -v
+KEYTIMEOUT=1
+
 # ---------------------------------- Modules ----------------------------------
 # Optional pieces of config live in $ZSH_CONFIG_DIR/modules, one file each.
 # The OS modules load automatically. Everything else is opted into from
@@ -186,7 +192,7 @@ gcfb() {
     echo "Committing with message: '$message'"
     git commit -a -m "$message"
   else
-    echo "Branch name '$branch' doesn't match expected pattern (e.g. SP-6970-Add-ECR-Targets)" >&2
+    echo "Branch name '$branch' doesn't match expected pattern (e.g. ABC-123-Add-thing)" >&2
     return 1
   fi
 }

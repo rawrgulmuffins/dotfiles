@@ -1,7 +1,8 @@
 #!/bin/sh
 # Open a URL, or a file by its Linux path, in the default Windows application.
+# explorer.exe is called by full path so this works with appendWindowsPath=false.
 target="$1"
 if [ -e "$target" ]; then
     target=$(wslpath -w "$target")
 fi
-exec explorer.exe "$target"
+exec /mnt/c/Windows/explorer.exe "$target"
