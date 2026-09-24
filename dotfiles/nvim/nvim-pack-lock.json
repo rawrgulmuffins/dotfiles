@@ -24,6 +24,10 @@
       "rev": "046b1a797af1effe8e0474b9af9657a3761ec58a",
       "src": "https://github.com/neovim/nvim-lspconfig"
     },
+    "peek.nvim": {
+      "rev": "5820d937d5414baea5f586dc2a3d912a74636e5b",
+      "src": "https://github.com/toppair/peek.nvim"
+    },
     "pgsql.vim": {
       "rev": "16584d7a1f2c528560a646a63625c6731a72c8c7",
       "src": "https://github.com/lifepillar/pgsql.vim"

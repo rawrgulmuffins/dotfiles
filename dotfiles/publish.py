@@ -1,10 +1,13 @@
 """Symlink the configs in this directory into the home directory.
 
 Anything already at a destination that isn't the expected link is moved aside
-to a .bak file first, so nothing is overwritten. Safe to run repeatedly.
+to a .bak file first, so nothing is overwritten. Missing .local files are
+created from the examples, and existing ones are left alone. Safe to run
+repeatedly.
 """
 
 import os
+import shutil
 import time
 from pathlib import Path
 
@@ -25,6 +28,13 @@ CONFIG_LINKS: list[tuple[str, str]] = [
 ]
 
 
+# Created only when missing, since they hold per-machine edits.
+LOCAL_FILES: list[tuple[str, str]] = [
+    ("zsh/zshrc.local.example", ".zshrc.local"),
+    ("gitconfig.local.example", ".gitconfig.local"),
+]
+
+
 def backup_path_for(destination: Path) -> Path:
     backup = destination.with_name(destination.name + ".bak")
     if backup.exists() or backup.is_symlink():
@@ -33,8 +43,12 @@ def backup_path_for(destination: Path) -> Path:
     return backup
 
 
+def is_linked(source: Path, destination: Path) -> bool:
+    return destination.is_symlink() and destination.resolve() == source
+
+
 def link(source: Path, destination: Path) -> None:
-    if destination.is_symlink() and destination.resolve() == source:
+    if is_linked(source, destination):
         print(f"ok       {destination}")
         return
 
@@ -46,6 +60,14 @@ def link(source: Path, destination: Path) -> None:
 
     destination.symlink_to(source)
     print(f"linked   {destination} -> {source}")
+
+
+def create_if_missing(example: Path, destination: Path) -> None:
+    if destination.exists() or destination.is_symlink():
+        print(f"kept     {destination}")
+        return
+    shutil.copyfile(example, destination)
+    print(f"created  {destination}, edit it for this machine")
 
 
 def planned_links() -> list[tuple[Path, Path]]:
@@ -63,6 +85,8 @@ def planned_links() -> list[tuple[Path, Path]]:
 def main() -> None:
     for source, destination in planned_links():
         link(source, destination)
+    for example_name, destination_name in LOCAL_FILES:
+        create_if_missing(SOURCE_DIR / example_name, Path.home() / destination_name)
 
 
 if __name__ == "__main__":

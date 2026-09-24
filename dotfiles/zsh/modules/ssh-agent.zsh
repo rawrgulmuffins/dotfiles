@@ -13,6 +13,5 @@ if [[ ! -r ~/.ssh/load_keys ]]; then
 fi
 
 ssh_key_names=(${(f)"$(<~/.ssh/load_keys)"})
-ssh_key_names=(${ssh_key_names:#})
 eval "$(keychain --eval --quiet "${ssh_key_names[@]}")"
 unset ssh_key_names

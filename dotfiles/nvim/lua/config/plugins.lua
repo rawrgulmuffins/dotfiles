@@ -2,13 +2,32 @@ local function github(repo)
   return "https://github.com/" .. repo
 end
 
+local has_deno = vim.fn.executable("deno") == 1
+
 -- peek.nvim ships its preview app as TypeScript and needs Deno to build it.
+-- The lockfile installs it even without Deno, so the build is skipped there.
 -- Registered before vim.pack.add() so the hook also fires on first install.
+-- Waits for the build, since opening a preview needs its output.
 vim.api.nvim_create_autocmd("PackChanged", {
   callback = function(event)
     local name, kind = event.data.spec.name, event.data.kind
-    if name == "peek.nvim" and (kind == "install" or kind == "update") then
-      vim.system({ "deno", "task", "--quiet", "build:fast" }, { cwd = event.data.path })
+    if
+      name == "peek.nvim"
+      and (kind == "install" or kind == "update")
+      and has_deno
+    then
+      -- The bundle is gitignored, so an update keeps the old one. Removing it
+      -- first means a failed build leaves no output instead of a stale one.
+      os.remove(event.data.path .. "/public/main.bundle.js")
+      local build = vim
+        .system({ "deno", "task", "--quiet", "build:fast" }, { cwd = event.data.path, text = true })
+        :wait(120000)
+      if build.code ~= 0 then
+        vim.notify(
+          "peek.nvim build failed (exit " .. build.code .. "):\n" .. (build.stderr or ""),
+          vim.log.levels.ERROR
+        )
+      end
     end
   end,
 })
@@ -32,7 +51,7 @@ local specs = {
   github("rafi/awesome-vim-colorschemes"),
 }
 
-if vim.fn.executable("deno") == 1 then
+if has_deno then
   table.insert(specs, github("toppair/peek.nvim"))
 end
 
@@ -41,20 +60,17 @@ vim.pack.add(specs)
 require("gitsigns").setup({
   on_attach = function(bufnr)
     local gitsigns = require("gitsigns")
-    vim.keymap.set("n", "]c", function()
-      if vim.wo.diff then
-        vim.cmd.normal({ "]c", bang = true })
-      else
-        gitsigns.nav_hunk("next")
-      end
-    end, { buffer = bufnr })
-    vim.keymap.set("n", "[c", function()
-      if vim.wo.diff then
-        vim.cmd.normal({ "[c", bang = true })
-      else
-        gitsigns.nav_hunk("prev")
-      end
-    end, { buffer = bufnr })
+    local function hunk_jump(key, direction)
+      vim.keymap.set("n", key, function()
+        if vim.wo.diff then
+          vim.cmd.normal({ key, bang = true })
+        else
+          gitsigns.nav_hunk(direction)
+        end
+      end, { buffer = bufnr })
+    end
+    hunk_jump("]c", "next")
+    hunk_jump("[c", "prev")
   end,
 })
 
@@ -96,6 +112,6 @@ vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePost", "InsertLeave" }, {
   end,
 })
 
-if vim.fn.executable("deno") == 1 then
+if has_deno then
   require("peek").setup({ app = "browser" })
 end

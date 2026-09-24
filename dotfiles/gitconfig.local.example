@@ -1,8 +1,9 @@
-# Copy to ~/.gitconfig.local and edit.
+# Included at the end of ~/.gitconfig. Holds identity and anything specific to
+# one machine or one employer.
 
 [user]
 	name = Alex LordThorsen
-	email = you@example.com
+	# email = you@example.com
 
 # HTTPS auth for GitHub through the gh CLI. Needs gh installed and
 # `gh auth login` run once.
