@@ -29,6 +29,8 @@ The local files load last, so they can override anything else.
 | `dotfiles/zsh/zshrc.local.example` | copied to `~/.zshrc.local` | Starting point for local zsh settings |
 | `dotfiles/gitconfig.local.example` | copied to `~/.gitconfig.local` | Starting point for local git settings |
 | `dotfiles/python_gitignore` | not installed | `.gitignore` template for new Python projects |
+| `dotfiles/publish.py` | not installed | Creates the links |
+| `dotfiles/check_setup.py` | not installed | Checks that the installed setup works on this machine |
 
 `publish.py` creates the links. The `.local` files are copies, since they're
 edited per machine. When `$XDG_CONFIG_HOME` is set, the `~/.config` links go
@@ -78,6 +80,19 @@ cp dotfiles/gitconfig.local.example ~/.gitconfig.local
 at a destination is moved to a `.bak` file first. Edit the two `.local` files
 for the machine. They hold identity, git hosting auth, work-specific settings,
 and opt-in modules, and are never committed.
+
+Then check the result:
+
+```bash
+python3 dotfiles/check_setup.py
+```
+
+It prints one line per check and exits non-zero if anything fails. It covers
+the links, the Neovim version and plugin pins, format-on-save and linting,
+the language servers, zsh history and keybindings, tmux, git, and on WSL the
+Windows clipboard. A missing optional tool shows as WARN, and a check that
+needs that tool shows as SKIP. Run it again after upgrading Neovim, the
+plugins, or any of the tools. It needs Linux, and exits on anything else.
 
 WSL setup
 ---------
@@ -136,8 +151,8 @@ Inside Ubuntu:
    refuses to commit or guesses an address from the hostname.
 8. Make zsh the login shell with `chsh -s "$(which zsh)"`, then open a new
    terminal.
-9. Start `nvim` once so the plugins install, then run `:checkhealth` to see
-   which language servers and formatters are still missing.
+9. Start `nvim` once so the plugins install.
+10. Run `python3 dotfiles/check_setup.py` from the clone and fix any FAIL.
 
 Once it's running, check that Ctrl+V reaches Neovim. Press it in normal mode
 and look for `-- VISUAL BLOCK --` at the bottom of the screen. If the

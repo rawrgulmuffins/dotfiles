@@ -48,13 +48,21 @@ def link(source: Path, destination: Path) -> None:
     print(f"linked   {destination} -> {source}")
 
 
-def main() -> None:
+def planned_links() -> list[tuple[Path, Path]]:
     home = Path.home()
     config_home = Path(os.environ.get("XDG_CONFIG_HOME") or home / ".config")
-    for source_name, destination_name in HOME_LINKS:
-        link(SOURCE_DIR / source_name, home / destination_name)
-    for source_name, destination_name in CONFIG_LINKS:
-        link(SOURCE_DIR / source_name, config_home / destination_name)
+    return [
+        (SOURCE_DIR / source_name, home / destination_name)
+        for source_name, destination_name in HOME_LINKS
+    ] + [
+        (SOURCE_DIR / source_name, config_home / destination_name)
+        for source_name, destination_name in CONFIG_LINKS
+    ]
+
+
+def main() -> None:
+    for source, destination in planned_links():
+        link(source, destination)
 
 
 if __name__ == "__main__":

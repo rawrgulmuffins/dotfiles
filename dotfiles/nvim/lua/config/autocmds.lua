@@ -20,14 +20,14 @@ vim.filetype.add({
 
 local two_space_filetypes = {
   "css",
-  "eruby",
   "groovy",
   "htmldjango",
   "javascript",
+  "json",
+  "jsonc",
+  "lua",
   "puppet",
-  "ruby",
   "tex",
-  "yaml",
 }
 autocmd("FileType", {
   pattern = two_space_filetypes,
