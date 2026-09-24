@@ -1,0 +1,20 @@
+# Copy to ~/.gitconfig.local and edit.
+
+[user]
+	name = Alex LordThorsen
+	email = you@example.com
+
+# HTTPS auth for GitHub through the gh CLI. Needs gh installed and
+# `gh auth login` run once.
+# [credential "https://github.com"]
+# 	helper =
+# 	helper = !gh auth git-credential
+# [credential "https://gist.github.com"]
+# 	helper =
+# 	helper = !gh auth git-credential
+
+# Send GitHub HTTPS URLs over ssh instead. Only turn this on once ssh keys are
+# set up for GitHub. Without them, every clone and fetch from GitHub fails,
+# including Neovim's plugin installs.
+# [url "git@github.com:"]
+# 	insteadOf = https://github.com/

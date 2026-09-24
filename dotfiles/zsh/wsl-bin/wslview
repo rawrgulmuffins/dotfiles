@@ -1,0 +1,8 @@
+#!/bin/sh
+# explorer.exe can't resolve Linux paths, so files are converted first.
+# explorer.exe is called by full path so this works with appendWindowsPath=false.
+target="$1"
+if [ -e "$target" ]; then
+    target=$(wslpath -w "$target")
+fi
+exec /mnt/c/Windows/explorer.exe "$target"

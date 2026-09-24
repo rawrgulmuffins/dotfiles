@@ -1,0 +1,3 @@
+# Ubuntu's /etc/zsh/zshrc runs compinit unless this is set. ~/.zshrc runs it
+# too, after its completion settings, so the global one is wasted startup time.
+skip_global_compinit=1
