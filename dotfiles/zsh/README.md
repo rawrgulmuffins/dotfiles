@@ -17,10 +17,10 @@ Install
 -------
 
 `publish.py` links `zshrc` to `~/.zshrc` and this directory to
-`~/.config/zsh`, where the zshrc looks for modules. It also links `zshenv` to
-`~/.zshenv`, which stops Ubuntu's global zshrc from running compinit a second
-time. Without that link, every
-new shell on macOS or WSL prints a "module not found" error.
+`~/.config/zsh`, where the zshrc looks for modules. Without that link, every
+new shell on macOS or WSL prints a "module not found" error. It also links
+`zshenv` to `~/.zshenv`, which stops Ubuntu's global zshrc from running
+compinit a second time.
 
 Local config
 ------------

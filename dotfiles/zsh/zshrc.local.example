@@ -1,5 +1,5 @@
-# Copy to ~/.zshrc.local and edit. This file is sourced at the end of ~/.zshrc
-# and holds anything specific to one machine or one employer.
+# Sourced at the end of ~/.zshrc. Holds anything specific to one machine or
+# one employer.
 
 # Optional modules from ~/.config/zsh/modules
 # load_zsh_module ssh-agent

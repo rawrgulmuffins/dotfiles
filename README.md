@@ -26,15 +26,15 @@ The local files load last, so they can override anything else.
 | `dotfiles/tmux.conf` | `~/.tmux.conf` | tmux |
 | `dotfiles/gitconfig` | `~/.gitconfig` | git aliases and push/pull behavior |
 | `dotfiles/git_ignore` | `~/.config/git/ignore` | Files git ignores in every repo |
-| `dotfiles/zsh/zshrc.local.example` | copied to `~/.zshrc.local` | Starting point for local zsh settings |
-| `dotfiles/gitconfig.local.example` | copied to `~/.gitconfig.local` | Starting point for local git settings |
+| `dotfiles/zsh/zshrc.local.example` | `~/.zshrc.local`, created if missing | Starting point for local zsh settings |
+| `dotfiles/gitconfig.local.example` | `~/.gitconfig.local`, created if missing | Starting point for local git settings |
 | `dotfiles/python_gitignore` | not installed | `.gitignore` template for new Python projects |
-| `dotfiles/publish.py` | not installed | Creates the links |
+| `dotfiles/publish.py` | not installed | Creates the links and any missing `.local` files |
 | `dotfiles/check_setup.py` | not installed | Checks that the installed setup works on this machine |
 
-`publish.py` creates the links. The `.local` files are copies, since they're
-edited per machine. When `$XDG_CONFIG_HOME` is set, the `~/.config` links go
-there instead.
+`publish.py` creates the links. The `.local` files are copies instead of
+links, since they're edited per machine. When `$XDG_CONFIG_HOME` is set, the
+`~/.config` links go there instead.
 
 ### Load order
 
@@ -72,14 +72,14 @@ Install
 
 ```bash
 python3 dotfiles/publish.py
-cp dotfiles/zsh/zshrc.local.example ~/.zshrc.local
-cp dotfiles/gitconfig.local.example ~/.gitconfig.local
 ```
 
 `publish.py` symlinks each config into the home directory. Anything already
-at a destination is moved to a `.bak` file first. Edit the two `.local` files
-for the machine. They hold identity, git hosting auth, work-specific settings,
-and opt-in modules, and are never committed.
+at a destination is moved to a `.bak` file first. It also creates
+`~/.zshrc.local` and `~/.gitconfig.local` from the example files, but only
+when they don't exist. Edit the two
+`.local` files for the machine. They hold identity, git hosting auth,
+work-specific settings, and opt-in modules, and are never committed.
 
 Then check the result:
 
@@ -147,8 +147,8 @@ Inside Ubuntu:
    cd dotfiles
    ```
 
-7. Set the work email in `~/.gitconfig.local`. Until then, git either
-   refuses to commit or guesses an address from the hostname.
+7. Set the work email in `~/.gitconfig.local`. Until then, git refuses to
+   commit.
 8. Make zsh the login shell with `chsh -s "$(which zsh)"`, then open a new
    terminal.
 9. Start `nvim` once so the plugins install.
@@ -169,9 +169,10 @@ plugin manager. Ubuntu 26.04's apt package is 0.11, so install from the
 [GitHub releases](https://github.com/neovim/neovim/releases) instead.
 
 Plugins install on first launch at the revisions pinned in
-`nvim-pack-lock.json`. The exception is `peek.nvim`, which only installs when
-`deno` is present and isn't pinned yet. Its first install adds it to the
-lockfile, and that change should be committed. To update them, run `:lua vim.pack.update()`, review the
+`nvim-pack-lock.json`. `peek.nvim` installs everywhere, but it's only built
+and loaded when `deno` is present. If the build fails, or `deno` is installed
+later, `check_setup.py` prints the command to build it. To
+update the plugins, run `:lua vim.pack.update()`, review the
 changes, confirm with `:write`, and commit the lockfile. The config is
 symlinked, so the update writes the lockfile straight into this repo.
 

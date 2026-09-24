@@ -4,7 +4,7 @@ export EDITOR="nvim"
 export VISUAL="$EDITOR"
 
 # Lets gpg prompt for a passphrase in the terminal, for signed commits.
-export GPG_TTY=$(tty)
+export GPG_TTY=$TTY
 
 # Set explicitly, since zsh otherwise picks the keymap from $EDITOR.
 # KEYTIMEOUT is in hundredths of a second, and the default of 40 makes Esc
@@ -98,7 +98,6 @@ unsetopt LIST_AMBIGUOUS
 # `complete -C`, for one) register them here.
 autoload -U compinit && compinit
 autoload -U bashcompinit && bashcompinit
-#eval "$(register-python-argcomplete pipx)"
 
 # ------------------------------ Alias Functions ------------------------------
 # Commented out until it's been run against a real repo.
@@ -138,14 +137,13 @@ urldecode() {
 
 # ------------------------------ Aliases ------------------------------
 # Debian and Ubuntu install bat as batcat, since another package owns the name.
-if (( ! $+commands[bat] && $+commands[batcat] )); then
-    alias bat='batcat'
+if (( $+commands[bat] )); then
+    alias cat='bat'
+elif (( $+commands[batcat] )); then
+    alias bat='batcat' cat='batcat'
 fi
 if (( $+commands[lsd] )); then
     alias ls='lsd -Al --sort=time --git --reverse --group-dirs=first'
-fi
-if (( $+commands[bat] || $+commands[batcat] )); then
-    alias cat='bat'
 fi
 alias rg='rg --smart-case'
 alias cdev='make -C ~/git/claude-dev-container run'

@@ -14,6 +14,10 @@
 	rebase = true
 [branch]
 	autoSetupMerge = simple
+# Refuse to commit until user.email is set, instead of guessing one from the
+# hostname.
+[user]
+	useConfigOnly = true
 
 # Included last so local settings override the above.
 [include]

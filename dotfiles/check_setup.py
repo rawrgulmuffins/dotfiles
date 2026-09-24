@@ -4,6 +4,7 @@ Run after publish.py and after upgrading Neovim, plugins, or tools. Exits
 non-zero if any check fails. Built for the Linux and WSL target.
 """
 
+import functools
 import json
 import os
 import re
@@ -18,10 +19,10 @@ from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 
-from publish import planned_links
+from publish import SOURCE_DIR, is_linked, planned_links
 
-SOURCE_DIR = Path(__file__).resolve().parent
 LOCKFILE = SOURCE_DIR / "nvim" / "nvim-pack-lock.json"
+WSL_BIN = SOURCE_DIR / "zsh" / "wsl-bin"
 
 # A comment longer than the line limit is a violation sqlfluff can't fix.
 UNFIXABLE_SQL = "-- " + "x" * 120 + "\nSELECT a,b from t\n"
@@ -52,6 +53,18 @@ class Result:
     name: str
     status: Status
     detail: str = ""
+
+
+def outcome(
+    name: str,
+    passed: bool,
+    failure_detail: str = "",
+    pass_detail: str = "",
+    failure_status: Status = Status.FAIL,
+) -> Result:
+    if passed:
+        return Result(name, Status.PASS, pass_detail)
+    return Result(name, failure_status, failure_detail)
 
 
 def run(
@@ -89,7 +102,7 @@ def nvim_lua(lua: str, cwd: Path | None = None) -> str:
     return completed.stdout
 
 
-def nvim_messages_after(commands: list[str], cwd: Path) -> str:
+def nvim_messages_after(commands: list[str], cwd: Path | None = None) -> str:
     arguments = ["nvim", "--headless"]
     for command in commands:
         arguments += ["-c", command]
@@ -98,19 +111,14 @@ def nvim_messages_after(commands: list[str], cwd: Path) -> str:
 
 
 def check_links() -> list[Result]:
-    results: list[Result] = []
-    for source, destination in planned_links():
-        if destination.is_symlink() and destination.resolve() == source:
-            results.append(Result(f"link {destination.name}", Status.PASS))
-        else:
-            results.append(
-                Result(
-                    f"link {destination.name}",
-                    Status.FAIL,
-                    f"{destination} is not linked to {source}; run publish.py",
-                )
-            )
-    return results
+    return [
+        outcome(
+            f"link {destination.name}",
+            is_linked(source, destination),
+            f"{destination} is not linked to {source}; run publish.py",
+        )
+        for source, destination in planned_links()
+    ]
 
 
 def check_nvim_version() -> Result:
@@ -137,20 +145,21 @@ def check_nvim_version() -> Result:
 def check_nvim_starts_clean() -> Result:
     # The first start may install plugins, which prints progress.
     run(["nvim", "--headless", "-c", "qa!"], timeout=300)
-    messages = nvim_lua('vim.fn.execute("messages")').strip()
-    if messages:
-        return Result("nvim starts clean", Status.FAIL, messages[:300])
-    return Result("nvim starts clean", Status.PASS)
+    messages = nvim_messages_after([]).strip()
+    return outcome("nvim starts clean", not messages, messages[:300])
+
+
+@functools.cache
+def plugin_dir() -> Path:
+    return Path(nvim_lua('vim.fn.stdpath("data")')) / "site" / "pack" / "core" / "opt"
 
 
 def check_plugins_match_lockfile() -> Result:
     pinned = json.loads(LOCKFILE.read_text())["plugins"]
-    plugin_dir = (
-        Path(nvim_lua('vim.fn.stdpath("data")')) / "site" / "pack" / "core" / "opt"
-    )
+    installed_dir = plugin_dir()
     mismatches: list[str] = []
     for name, entry in pinned.items():
-        checkout = plugin_dir / name
+        checkout = installed_dir / name
         if not checkout.is_dir():
             mismatches.append(f"{name} not installed")
             continue
@@ -164,18 +173,37 @@ def check_plugins_match_lockfile() -> Result:
     return Result("plugins match lockfile", Status.PASS, f"{len(pinned)} plugins")
 
 
+def check_peek_build() -> Result:
+    name = "peek.nvim build"
+    if shutil.which("deno") is None:
+        return Result(name, Status.SKIP, "deno not installed")
+    peek_dir = plugin_dir() / "peek.nvim"
+    if (peek_dir / "public" / "main.bundle.js").exists():
+        return Result(name, Status.PASS)
+    return Result(
+        name,
+        Status.FAIL,
+        f"no build output; rebuild with: cd {peek_dir} && deno task build:fast",
+    )
+
+
 def check_filetypes() -> Result:
     expected = {"new.tf": "terraform", "deploy.sh.j2": "sh", "page.j2": "htmldjango"}
-    wrong: list[str] = []
-    for filename, filetype in expected.items():
-        detected = nvim_lua(
-            f'tostring(vim.filetype.match({{ filename = "{filename}" }}))'
-        )
-        if detected != filetype:
-            wrong.append(f"{filename} is {detected}, expected {filetype}")
-    if wrong:
-        return Result("filetype detection", Status.FAIL, "; ".join(wrong))
-    return Result("filetype detection", Status.PASS)
+    matches = ", ".join(
+        f'tostring(vim.filetype.match({{ filename = "{filename}" }}))'
+        for filename in expected
+    )
+    detected = nvim_lua(f'table.concat({{ {matches} }}, "\\n")').splitlines()
+    wrong = [
+        f"{filename} is {found}, expected {filetype}"
+        for (filename, filetype), found in zip(expected.items(), detected, strict=False)
+        if found != filetype
+    ]
+    return outcome(
+        "filetype detection",
+        len(detected) == len(expected) and not wrong,
+        "; ".join(wrong),
+    )
 
 
 def format_on_save(
@@ -235,14 +263,11 @@ def check_sqlfluff_exit_code() -> Result:
     if shutil.which("sqlfluff") is None:
         return Result("sqlfluff exit code", Status.SKIP, "sqlfluff not installed")
     completed = run(["sqlfluff", "fix", "--dialect=postgres", "-"], stdin=UNFIXABLE_SQL)
-    if completed.returncode == 1 and "select" in completed.stdout.lower():
-        return Result(
-            "sqlfluff exit code", Status.PASS, "exits 1 and still prints the fix"
-        )
-    return Result(
+    return outcome(
         "sqlfluff exit code",
-        Status.FAIL,
+        completed.returncode == 1 and "select" in completed.stdout.lower(),
         f"exit {completed.returncode}; the nvim config's exit_codes = {{ 0, 1 }} assumes 1 with output",
+        "exits 1 and still prints the fix",
     )
 
 
@@ -258,10 +283,11 @@ def check_sql_lint() -> Result:
             "return tostring(#vim.diagnostic.get(0)) end)()",
             cwd=scratch_dir,
         )
-    if count.isdigit() and int(count) > 0:
-        return Result("sql lint", Status.PASS, f"{count} diagnostics on a bad file")
-    return Result(
-        "sql lint", Status.FAIL, f"no diagnostics on a bad file (got {count!r})"
+    return outcome(
+        "sql lint",
+        count.isdigit() and int(count) > 0,
+        f"no diagnostics on a bad file (got {count!r})",
+        f"{count} diagnostics on a bad file",
     )
 
 
@@ -288,22 +314,17 @@ def check_lsp_attaches() -> list[Result]:
                 f"return tostring(#vim.lsp.get_clients({{ bufnr = 0, name = '{server}' }})) end)()",
                 cwd=scratch_dir,
             )
-        results.append(
-            Result(
-                name,
-                Status.PASS if attached == "1" else Status.FAIL,
-                "" if attached == "1" else "did not attach within 20s",
-            )
-        )
+        results.append(outcome(name, attached == "1", "did not attach within 20s"))
     return results
 
 
 def check_optional_tools() -> list[Result]:
     return [
-        Result(
+        outcome(
             f"tool {executable}",
-            Status.PASS if shutil.which(executable) else Status.WARN,
-            "" if shutil.which(executable) else f"missing, no {purpose}",
+            shutil.which(executable) is not None,
+            f"missing, no {purpose}",
+            failure_status=Status.WARN,
         )
         for executable, purpose in OPTIONAL_TOOLS
     ]
@@ -359,59 +380,58 @@ def check_zsh() -> list[Result]:
     )
 
     results = [
-        Result(
+        outcome(
             "zsh starts quietly",
-            Status.WARN if startup_output.strip() else Status.PASS,
+            not startup_output.strip(),
             startup_output.strip()[:300],
+            failure_status=Status.WARN,
         ),
-        Result(
+        outcome(
             "zsh saves history",
-            Status.PASS
-            if values.get("HISTFILE") and values.get("SAVEHIST", "0") not in ("", "0")
-            else Status.FAIL,
+            bool(values.get("HISTFILE"))
+            and values.get("SAVEHIST", "0") not in ("", "0"),
             f"HISTFILE={values.get('HISTFILE')} SAVEHIST={values.get('SAVEHIST')}",
         ),
-        Result(
+        outcome(
             "zsh vi keymap",
-            Status.PASS if "viins" in values.get("KEYMAP", "") else Status.FAIL,
+            "viins" in values.get("KEYMAP", ""),
             values.get("KEYMAP", ""),
         ),
-        Result(
+        outcome(
             "zsh fzf Ctrl-R",
-            Status.PASS if "fzf" in values.get("CTRL_R", "") else Status.FAIL,
+            "fzf" in values.get("CTRL_R", ""),
             values.get("CTRL_R", ""),
         ),
-        Result(
+        outcome(
             "zsh skips global compinit",
-            Status.PASS if values.get("SKIP_GLOBAL_COMPINIT") == "1" else Status.FAIL,
-            ""
-            if values.get("SKIP_GLOBAL_COMPINIT") == "1"
-            else "~/.zshenv not linked?",
+            values.get("SKIP_GLOBAL_COMPINIT") == "1",
+            "~/.zshenv not linked?",
         ),
-        Result(
+        outcome(
             "zsh cat alias",
-            Status.PASS if "bat" in values.get("CAT", "") else Status.WARN,
-            values.get("CAT") or "no alias, bat not installed",
+            "bat" in values.get("CAT", ""),
+            "no alias, bat not installed",
+            values.get("CAT", ""),
+            failure_status=Status.WARN,
         ),
     ]
 
     if is_wsl():
-        shim_dir = SOURCE_DIR / "zsh" / "wsl-bin"
         shims_first = all(
-            values.get(key) and Path(values[key]).resolve().parent == shim_dir
+            values.get(key) and Path(values[key]).resolve().parent == WSL_BIN
             for key in ("WSLVIEW", "PBCOPY")
         )
         results.append(
-            Result(
+            outcome(
                 "zsh wsl shims on PATH",
-                Status.PASS if shims_first else Status.FAIL,
+                shims_first,
                 f"wslview={values.get('WSLVIEW')} pbcopy={values.get('PBCOPY')}",
             )
         )
         results.append(
-            Result(
+            outcome(
                 "zsh BROWSER",
-                Status.PASS if values.get("BROWSER") == "wslview" else Status.FAIL,
+                values.get("BROWSER") == "wslview",
                 values.get("BROWSER", ""),
             )
         )
@@ -450,17 +470,14 @@ def check_tmux() -> list[Result]:
         features = run(socket + ["show-options", "-g", "terminal-features"]).stdout
         return [
             Result("tmux loads config", Status.PASS),
-            Result(
+            outcome(
                 "tmux default-terminal",
-                Status.PASS if terminal == "tmux-256color" else Status.WARN,
-                terminal
-                if terminal == "tmux-256color"
-                else f"{terminal}, tmux-256color terminfo missing",
+                terminal == "tmux-256color",
+                f"{terminal}, tmux-256color terminfo missing",
+                terminal,
+                failure_status=Status.WARN,
             ),
-            Result(
-                "tmux true color",
-                Status.PASS if "xterm-256color:RGB" in features else Status.FAIL,
-            ),
+            outcome("tmux true color", "xterm-256color:RGB" in features),
         ]
     finally:
         run(socket + ["kill-server"])
@@ -475,7 +492,7 @@ def check_git() -> list[Result]:
             Result(
                 "git local config",
                 Status.FAIL,
-                "~/.gitconfig.local missing; copy gitconfig.local.example",
+                "~/.gitconfig.local missing; run publish.py",
             )
         )
     elif not email or email == "you@example.com":
@@ -494,12 +511,10 @@ def check_git() -> list[Result]:
         env={**os.environ, "GIT_TERMINAL_PROMPT": "0"},
     )
     results.append(
-        Result(
+        outcome(
             "git anonymous https clone",
-            Status.PASS if anonymous.returncode == 0 else Status.FAIL,
-            ""
-            if anonymous.returncode == 0
-            else "Neovim plugin installs need this; check url.insteadOf in ~/.gitconfig.local",
+            anonymous.returncode == 0,
+            "Neovim plugin installs need this; check url.insteadOf in ~/.gitconfig.local",
         )
     )
     return results
@@ -514,9 +529,10 @@ def check_windows_interop() -> list[Result]:
         "/mnt/c/Windows/System32/clip.exe",
     ):
         results.append(
-            Result(
+            outcome(
                 f"windows {Path(windows_path).name}",
-                Status.PASS if Path(windows_path).exists() else Status.FAIL,
+                Path(windows_path).exists(),
+                windows_path,
                 windows_path,
             )
         )
@@ -528,7 +544,7 @@ def check_windows_interop() -> list[Result]:
         "-Command",
         "[Console]::OutputEncoding = [Text.Encoding]::UTF8; Get-Clipboard",
     ]
-    pbcopy = str(SOURCE_DIR / "zsh" / "wsl-bin" / "pbcopy")
+    pbcopy = str(WSL_BIN / "pbcopy")
     for label, sample, failure_status, advice in (
         (
             "ascii",
@@ -540,12 +556,12 @@ def check_windows_interop() -> list[Result]:
     ):
         run([pbcopy], stdin=sample)
         pasted = run(read_clipboard).stdout.strip()
-        detail = "" if pasted == sample else f"read back {pasted!r}; {advice}"
         results.append(
-            Result(
+            outcome(
                 f"clipboard {label} round trip",
-                Status.PASS if pasted == sample else failure_status,
-                detail,
+                pasted == sample,
+                f"read back {pasted!r}; {advice}",
+                failure_status=failure_status,
             )
         )
     return results
@@ -561,6 +577,7 @@ def main() -> None:
     results.append(check_nvim_version())
     results.append(check_nvim_starts_clean())
     results.append(check_plugins_match_lockfile())
+    results.append(check_peek_build())
     results.append(check_filetypes())
     results += check_format_on_save()
     results.append(check_sqlfluff_exit_code())

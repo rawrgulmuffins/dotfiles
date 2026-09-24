@@ -1,6 +1,3 @@
--- Enabled only when the executable is on PATH, so a machine missing one
--- doesn't produce an error on every file open.
-
 vim.lsp.config("pyright", {
   settings = {
     pyright = {
@@ -10,20 +7,7 @@ vim.lsp.config("pyright", {
   },
 })
 
-local servers = {
-  "pyright",
-  "ruff",
-  "bashls",
-  "terraformls",
-}
-
-for _, server in ipairs(servers) do
-  local server_config = vim.lsp.config[server]
-  local command = server_config and server_config.cmd
-  if type(command) == "table" and vim.fn.executable(command[1]) == 1 then
-    vim.lsp.enable(server)
-  end
-end
+vim.lsp.enable({ "pyright", "ruff", "bashls", "terraformls" })
 
 vim.api.nvim_create_autocmd("LspAttach", {
   callback = function(event)
